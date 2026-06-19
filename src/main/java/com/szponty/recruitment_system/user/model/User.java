@@ -1,8 +1,11 @@
-package com.szponty.recruitment_system.model;
+package com.szponty.recruitment_system.user.model;
 
+import com.szponty.recruitment_system.dictionary.model.Department;
+import com.szponty.recruitment_system.role.model.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -14,7 +17,7 @@ import java.util.UUID;
 @Setter
 @Builder
 @Table(name = "app_user")
-public class UserEntity {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -25,6 +28,17 @@ public class UserEntity {
     private String password;
     private String description;
 
+    @ManyToOne
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
+
+    @ManyToOne
+    @JoinColumn(name = "department_id", nullable = false)
+    private Department department;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }
