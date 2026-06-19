@@ -3,6 +3,7 @@ package com.szponty.recruitment_system.role.model;
 import com.szponty.recruitment_system.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -35,6 +36,8 @@ public class Role {
     private boolean canManageRoles;
 
     private boolean canViewLogs;
+
+    @ColumnDefault("false")
     private boolean deleted;
 
     @OneToMany(mappedBy = "role")

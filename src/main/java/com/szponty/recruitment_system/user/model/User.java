@@ -4,6 +4,7 @@ import com.szponty.recruitment_system.dictionary.model.Department;
 import com.szponty.recruitment_system.role.model.Role;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -27,6 +28,9 @@ public class User {
     private String email;
     private String password;
     private String description;
+
+    @ColumnDefault("false")
+    private boolean locked;
 
     @ManyToOne
     @JoinColumn(name = "role_id", nullable = false)
