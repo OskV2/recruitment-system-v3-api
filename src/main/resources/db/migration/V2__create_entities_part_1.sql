@@ -130,6 +130,8 @@ CREATE TABLE job_offer
     CONSTRAINT fk_recruitment_process_version FOREIGN KEY (recruitment_process_version_id)
         REFERENCES recruitment_process_version (id),
 
+    CONSTRAINT fk_department FOREIGN KEY (department_id) REFERENCES department(id),
+
     CONSTRAINT fk_recruiter FOREIGN KEY (recruiter_id)
         REFERENCES app_user (id),
 
