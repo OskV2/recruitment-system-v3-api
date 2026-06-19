@@ -3,19 +3,19 @@
 ```mermaid
     erDiagram
     User {
-        int id PK
+        uuid id PK
         string firstName
         string lastName
         string email UK
         string password
-        int roleId FK
+        uuid roleId FK
         boolean deleted
         datetime createdAt
         datetime updatedAt
     }
 
     Role {
-        int id PK
+        uuid id PK
         string name UK
         string description
         boolean canManageUsers
@@ -31,15 +31,16 @@
     }
 
     JobOffer {
-        int id PK
+        uuid id PK
         string name
         string description
         string additionalInformation
         string salary
-        int contractTypeId FK
-        int locationId FK
-        int fullTimeEquivalentId FK
-        int workModelId FK
+        uuid contractTypeId FK
+        uuid locationId FK
+        uuid fullTimeEquivalentId FK
+        uuid workModelId FK
+        uuid departmentId FK
         string[] mustHaveRequirements
         string[] niceToSeeRequirements
         datetime validFrom
@@ -47,15 +48,15 @@
         string offerStatus "ENUM('DRAFT', 'PENDING', 'ACTIVE', 'INACTIVE', 'CLOSED')"
         int vacancy
         uuid recruitmentProcessVersionId FK
-        int recruiterId FK
-        int substituteRecruiterId FK
+        uuid recruiterId FK
+        uuid substituteRecruiterId FK
         boolean deleted
         datetime createdAt
         datetime updatedAt
     }
 
     ContractType {
-        int id PK
+        uuid id PK
         string name
         string description
         boolean deleted
@@ -64,7 +65,7 @@
     }
 
     Location {
-        int id PK
+        uuid id PK
         string country
         string city
         string description
@@ -74,7 +75,7 @@
     }
 
     FullTimeEquivalent {
-        int id PK
+        uuid id PK
         string name
         string description
         boolean deleted
@@ -83,7 +84,7 @@
     }
 
     WorkModel {
-        int id PK
+        uuid id PK
         string name
         string description
         boolean deleted
@@ -92,7 +93,16 @@
     }
 
     Benefit {
-        int id PK
+        uuid id PK
+        string name
+        string description
+        boolean deleted
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    Department {
+        uuid id PK
         string name
         string description
         boolean deleted
@@ -101,12 +111,12 @@
     }
 
     JobOfferBenefit {
-        int jobOfferId PK,FK
-        int benefitId PK,FK
+        uuid jobOfferId PK,FK
+        uuid benefitId PK,FK
     }
 
     RecruitmentProcess {
-        int id PK
+        uuid id PK
         string name
         string description
         boolean deleted
@@ -116,14 +126,14 @@
 
     RecruitmentProcessVersion {
         uuid id PK
-        int recruitmentProcessId FK
-        int version
+        uuid recruitmentProcessId FK
+        uuid version
         boolean active
         datetime createdAt
     }
 
     ProcessStep {
-        int id PK
+        uuid id PK
         uuid processVersionId FK
         int stepOrder
         string name
@@ -136,11 +146,11 @@
     }
 
     JobApplication {
-        int id PK
+        uuid id PK
         string publicToken UK
-        int jobOfferId FK
+        uuid jobOfferId FK
         uuid recruitmentProcessVersionId FK
-        int currentApplicationStepId FK
+        uuid currentApplicationStepId FK
         string firstName
         string lastName
         string email
@@ -153,17 +163,17 @@
     }
 
     JobApplicationStep {
-        int id PK
-        int applicationId FK
-        int processStepId FK
+        uuid id PK
+        uuid applicationId FK
+        uuid processStepId FK
         int stepOrder
         string status "ENUM('WAITING', 'CURRENT', 'COMPLETED', 'REJECTED', 'SKIPPED', 'CANCELLED')"
         datetime startedAt
-        int startedByUserId FK
+        uuid startedByUserId FK
         datetime completedAt
-        int completedByUserId FK
+        uuid completedByUserId FK
         datetime rejectedAt
-        int rejectedByUserId FK
+        uuid rejectedByUserId FK
         string decisionComment
         string rejectionReason
         boolean deleted
@@ -172,10 +182,10 @@
     }
 
     Interview {
-        int id PK
-        int applicationId FK
-        int applicationStepId FK
-        int recruiterId FK
+        uuid id PK
+        uuid applicationId FK
+        uuid applicationStepId FK
+        uuid recruiterId FK
         datetime scheduledStart
         datetime scheduledEnd
         string status "ENUM('SCHEDULED', 'COMPLETED', 'CANCELLED', 'NO_SHOW', 'RESCHEDULED')"
@@ -188,19 +198,19 @@
     }
 
     Attachment {
-        int id PK
+        uuid id PK
         string originalName
         string storedName
         string path
         boolean isCV
-        int applicationId FK
+        uuid applicationId FK
         boolean deleted
         datetime createdAt
         datetime updatedAt
     }
 
     Log {
-        int id PK
+        uuid id PK
         string message
         string trigger
         string type
@@ -224,6 +234,7 @@
     %% Relacje ofert pracy
 
     ContractType ||--o{ JobOffer : contract_type
+    Department ||--o{ JobOffer : department
     Location ||--o{ JobOffer : location
     FullTimeEquivalent ||--o{ JobOffer : fte
     WorkModel ||--o{ JobOffer : work_model
