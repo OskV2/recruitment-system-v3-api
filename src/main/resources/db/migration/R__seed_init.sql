@@ -186,7 +186,7 @@ INSERT INTO job_offer(id,
                       work_model_id,
                       department_id,
                       must_have_requirements,
-                      nice_to_see_requirements,
+                      nice_to_have_requirements,
                       valid_from,
                       valid_to,
                       offer_status,
@@ -256,13 +256,6 @@ VALUES ('b0000000-0000-0000-0000-000000000001',
         'CURRENT',
         NOW(),
         'd2222222-2222-2222-2222-222222222222');
-
-
-UPDATE job_application
-SET current_job_application_step_id =
-        'b0000000-0000-0000-0000-000000000001'
-WHERE id =
-      'a0000000-0000-0000-0000-000000000001';
 
 INSERT INTO interview(id,
                       job_application_id,

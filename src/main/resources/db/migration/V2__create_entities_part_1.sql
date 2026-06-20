@@ -106,7 +106,7 @@ CREATE TABLE job_offer
     department_id                  UUID         NOT NULL,
 
     must_have_requirements         TEXT[]       NOT NULL,
-    nice_to_see_requirements       TEXT[]       NOT NULL,
+    nice_to_have_requirements      TEXT[]       NOT NULL,
 
     valid_from                     TIMESTAMP    NOT NULL,
     valid_to                       TIMESTAMP    NOT NULL,
@@ -130,7 +130,7 @@ CREATE TABLE job_offer
     CONSTRAINT fk_recruitment_process_version FOREIGN KEY (recruitment_process_version_id)
         REFERENCES recruitment_process_version (id),
 
-    CONSTRAINT fk_department FOREIGN KEY (department_id) REFERENCES department(id),
+    CONSTRAINT fk_department FOREIGN KEY (department_id) REFERENCES department (id),
 
     CONSTRAINT fk_recruiter FOREIGN KEY (recruiter_id)
         REFERENCES app_user (id),
@@ -141,10 +141,11 @@ CREATE TABLE job_offer
 
 CREATE TABLE job_offer_benefit
 (
+    id           UUID PRIMARY KEY DEFAULT GEN_RANDOM_UUID(),
     job_offer_id UUID NOT NULL,
     benefit_id   UUID NOT NULL,
 
-    PRIMARY KEY (job_offer_id, benefit_id),
+    CONSTRAINT uq_job_offer_benefit UNIQUE (job_offer_id, benefit_id),
 
     CONSTRAINT fk_job_offer FOREIGN KEY (job_offer_id)
         REFERENCES job_offer (id) ON DELETE CASCADE,
@@ -180,7 +181,6 @@ CREATE TABLE job_application
     public_token                    UUID UNIQUE            NOT NULL,
     job_offer_id                    UUID                   NOT NULL,
     recruitment_process_version_id  UUID                   NOT NULL,
-    current_job_application_step_id UUID,
 
     first_name                      VARCHAR(50)            NOT NULL,
     last_name                       VARCHAR(50)            NOT NULL,
@@ -303,10 +303,3 @@ CREATE TABLE log
     created_at TIMESTAMP    NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP    NOT NULL DEFAULT NOW()
 );
-
-
-ALTER TABLE job_application
-    ADD CONSTRAINT fk_job_application_current_step
-        FOREIGN KEY (current_job_application_step_id)
-            REFERENCES job_application_step (id)
-            ON DELETE SET NULL;
