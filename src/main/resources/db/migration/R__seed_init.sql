@@ -192,7 +192,8 @@ INSERT INTO job_offer(id,
                       offer_status,
                       vacancy,
                       recruitment_process_version_id,
-                      recruiter_id)
+                      recruiter_id,
+                      substitute_recruiter_id)
 VALUES ('90000000-0000-0000-0000-000000000001',
         'Senior Java Developer',
         'Spring Boot developer',
@@ -204,13 +205,14 @@ VALUES ('90000000-0000-0000-0000-000000000001',
         '30000000-0000-0000-0000-000000000001',
         '40000000-0000-0000-0000-000000000002',
         'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-        ARRAY['Java', 'Spring Boot', 'PostgreSQL'],
-        ARRAY['Docker', 'AWS'],
+        ARRAY['Java'],
+        ARRAY['Spring Boot'],
         NOW(),
         NOW() + INTERVAL '30 days',
         'ACTIVE',
         3,
         '70000000-0000-0000-0000-000000000001',
+        'd2222222-2222-2222-2222-222222222222',
         'd2222222-2222-2222-2222-222222222222');
 
 
