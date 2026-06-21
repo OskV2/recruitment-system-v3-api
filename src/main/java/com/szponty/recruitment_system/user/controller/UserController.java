@@ -1,6 +1,5 @@
 package com.szponty.recruitment_system.user.controller;
 
-import com.szponty.recruitment_system.auth.service.AuthService;
 import com.szponty.recruitment_system.user.dto.UserResponse;
 import com.szponty.recruitment_system.user.model.User;
 import com.szponty.recruitment_system.user.repository.UserRepository;
