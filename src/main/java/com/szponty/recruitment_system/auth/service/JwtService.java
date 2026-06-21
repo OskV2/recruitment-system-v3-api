@@ -3,10 +3,7 @@ package com.szponty.recruitment_system.auth.service;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.szponty.recruitment_system.user.model.User;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -15,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.JwsHeader;
 
 @Service
 public class JwtService {
@@ -23,6 +19,7 @@ public class JwtService {
     //  this class is fully vibe-coded
 
     private final JwtEncoder jwtEncoder;
+    private final JwtDecoder jwtDecoder;
     private final long expirationMinutes;
 
     public JwtService(
@@ -35,6 +32,10 @@ public class JwtService {
         );
 
         this.jwtEncoder = new NimbusJwtEncoder(new ImmutableSecret<>(secretKey));
+        this.jwtDecoder = NimbusJwtDecoder
+                .withSecretKey(secretKey)
+                .macAlgorithm(MacAlgorithm.HS256)
+                .build();
         this.expirationMinutes = expirationMinutes;
     }
 
@@ -53,5 +54,15 @@ public class JwtService {
 
         return jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims))
                 .getTokenValue();
+    }
+
+    public String extractUserId(String token) {
+        Jwt jwt = jwtDecoder.decode(token);
+        return jwt.getSubject();
+    }
+
+    public String extractEmail(String token) {
+        Jwt jwt = jwtDecoder.decode(token);
+        return jwt.getClaimAsString("email");
     }
 }
