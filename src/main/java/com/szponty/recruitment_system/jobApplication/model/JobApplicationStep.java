@@ -4,7 +4,6 @@ import com.szponty.recruitment_system.recruitmentProcess.model.ProcessStep;
 import com.szponty.recruitment_system.user.model.User;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Null;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
@@ -40,7 +39,7 @@ public class JobApplicationStep {
     @Column(name = "status", nullable = false, columnDefinition = "application_step_status")
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    private JobApplicationStatus status;
+    private JobApplicationStepStatus status;
 
     @Nullable
     private LocalDateTime startedAt;

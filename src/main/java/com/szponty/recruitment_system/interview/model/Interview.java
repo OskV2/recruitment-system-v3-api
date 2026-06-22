@@ -26,7 +26,7 @@ public class Interview {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "job_application_id")
     private JobApplication jobApplication;
 
