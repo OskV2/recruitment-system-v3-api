@@ -1,9 +1,7 @@
-package com.szponty.recruitment_system.recruitmentProcess.model;
-
+package com.szponty.recruitment_system.log.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -16,17 +14,17 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-@Table(name = "recruitment_process")
-public class RecruitmentProcess {
+@Table(name = "log")
+public class Log {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private String name;
-    private String description;
+    private String message;
 
-    @ColumnDefault("false")
-    private boolean deleted;
+    private String trigger;
+
+    private String type;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

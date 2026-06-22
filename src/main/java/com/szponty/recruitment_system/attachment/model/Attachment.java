@@ -1,6 +1,6 @@
-package com.szponty.recruitment_system.recruitmentProcess.model;
+package com.szponty.recruitment_system.attachment.model;
 
-
+import com.szponty.recruitment_system.jobApplication.model.JobApplication;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -16,14 +16,24 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-@Table(name = "recruitment_process")
-public class RecruitmentProcess {
+@Table(name = "attachment")
+public class Attachment {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private String name;
-    private String description;
+    private String originalName;
+
+    private String storedName;
+
+    private String path;
+
+    @Column(name = "isCv")
+    boolean cv;
+
+    @ManyToOne
+    @JoinColumn(name = "job_application_id")
+    private JobApplication jobApplication;
 
     @ColumnDefault("false")
     private boolean deleted;

@@ -1,7 +1,7 @@
 package com.szponty.recruitment_system.recruitmentProcess.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -10,7 +10,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@Builder
 @Table(name = "process_step")
 public class ProcessStep {
     @Id
