@@ -2,14 +2,16 @@
 
 ```mermaid
     erDiagram
-    User {
+    AppUser {
         uuid id PK
         string firstName
         string lastName
         string email UK
         string password
+        string description
+        boolean locked
         uuid roleId FK
-        boolean deleted
+        uuid departmentId FK
         datetime createdAt
         datetime updatedAt
     }
@@ -30,19 +32,29 @@
         datetime updatedAt
     }
 
+    Department {
+        uuid id PK
+        string name
+        string description
+        boolean deleted
+        datetime createdAt
+        datetime updatedAt
+    }
+
     JobOffer {
         uuid id PK
         string name
         string description
-        string additionalInformation
-        string salary
+        int salaryFrom
+        int salaryTo
+        string currency
         uuid contractTypeId FK
         uuid locationId FK
         uuid fullTimeEquivalentId FK
         uuid workModelId FK
         uuid departmentId FK
         string[] mustHaveRequirements
-        string[] niceToSeeRequirements
+        string[] niceToHaveRequirements
         datetime validFrom
         datetime validTo
         string offerStatus "ENUM('DRAFT', 'PENDING', 'ACTIVE', 'INACTIVE', 'CLOSED')"
@@ -101,18 +113,10 @@
         datetime updatedAt
     }
 
-    Department {
-        uuid id PK
-        string name
-        string description
-        boolean deleted
-        datetime createdAt
-        datetime updatedAt
-    }
-
     JobOfferBenefit {
-        uuid jobOfferId PK,FK
-        uuid benefitId PK,FK
+        uuid id PK
+        uuid jobOfferId FK "UNIQUE(jobOfferId, benefitId)"
+        uuid benefitId FK "UNIQUE(jobOfferId, benefitId)"
     }
 
     RecruitmentProcess {
@@ -147,10 +151,9 @@
 
     JobApplication {
         uuid id PK
-        string publicToken UK
+        uuid publicToken UK
         uuid jobOfferId FK
         uuid recruitmentProcessVersionId FK
-        uuid currentApplicationStepId FK
         string firstName
         string lastName
         string email
@@ -170,10 +173,10 @@
         string status "ENUM('WAITING', 'CURRENT', 'COMPLETED', 'REJECTED', 'SKIPPED', 'CANCELLED')"
         datetime startedAt
         uuid startedByUserId FK
-        datetime completedAt
-        uuid completedByUserId FK
-        datetime rejectedAt
-        uuid rejectedByUserId FK
+        datetime completedAt "nullable"
+        uuid completedByUserId FK "nullable"
+        datetime rejectedAt "nullable"
+        uuid rejectedByUserId FK "nullable"
         string decisionComment
         string rejectionReason
         boolean deleted
@@ -183,8 +186,8 @@
 
     Interview {
         uuid id PK
-        uuid applicationId FK
-        uuid applicationStepId FK
+        uuid jobApplicationId FK
+        uuid jobApplicationStepId FK
         uuid recruiterId FK
         datetime scheduledStart
         datetime scheduledEnd
@@ -203,7 +206,7 @@
         string storedName
         string path
         boolean isCV
-        uuid applicationId FK
+        uuid jobApplicationId FK
         boolean deleted
         datetime createdAt
         datetime updatedAt
@@ -218,18 +221,19 @@
         datetime updatedAt
     }
 
-    %% Relacje użytkowników i ról
+    %% Relacje użytkowników, ról i działów
 
-    Role ||--o{ User : has
+    Role ||--o{ AppUser : has
+    Department ||--o{ AppUser : has_users
 
-    User ||--o{ JobOffer : recruiter
-    User ||--o{ JobOffer : substitute_recruiter
+    AppUser ||--o{ JobOffer : recruiter
+    AppUser ||--o{ JobOffer : substitute_recruiter
 
-    User ||--o{ Interview : conducts
+    AppUser ||--o{ Interview : conducts
 
-    User ||--o{ JobApplicationStep : started_step
-    User ||--o{ JobApplicationStep : completed_step
-    User ||--o{ JobApplicationStep : rejected_step
+    AppUser ||--o{ JobApplicationStep : started_step
+    AppUser |o--o{ JobApplicationStep : completed_step
+    AppUser |o--o{ JobApplicationStep : rejected_step
 
     %% Relacje ofert pracy
 
