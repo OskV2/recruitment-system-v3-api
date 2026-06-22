@@ -73,7 +73,7 @@ VALUES ('d1111111-1111-1111-1111-111111111111',
         'Admin',
         'User',
         'admin@test.com',
-        '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
+        '$2a$10$E6oV69g59b2cO2iNNE.uzeXfUtol/SGaRwDnqoIfSbERC7U34iYo.',  --  root
         'System administrator account',
         FALSE,
         '11111111-1111-1111-1111-111111111111',
