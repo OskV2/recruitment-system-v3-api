@@ -1,6 +1,7 @@
 package com.szponty.recruitment_system.joboffer.model;
 
 import com.szponty.recruitment_system.dictionary.model.*;
+import com.szponty.recruitment_system.recruitmentProcess.model.RecruitmentProcessVersion;
 import com.szponty.recruitment_system.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -60,11 +61,15 @@ public class JobOffer {
     @JoinColumn(name = "department_id", nullable = false)
     private Department department;
 
-    @OneToOne
+    @ManyToOne
+    @JoinColumn(name = "recruitment_process_version_id", nullable = false)
+    private RecruitmentProcessVersion recruitmentProcessVersion;
+
+    @ManyToOne
     @JoinColumn(name = "recruiter_id", nullable = false)
     private User recruiterId;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "substitute_recruiter_id", nullable = false)
     private User substituteRecruiterId;
 
