@@ -221,7 +221,7 @@
         datetime updatedAt
     }
 
-    %% Relacje użytkowników, ról i działów
+%% Relacje użytkowników, ról i działów
 
     Role ||--o{ AppUser : has
     Department ||--o{ AppUser : has_users
@@ -235,7 +235,7 @@
     AppUser |o--o{ JobApplicationStep : completed_step
     AppUser |o--o{ JobApplicationStep : rejected_step
 
-    %% Relacje ofert pracy
+%% Relacje ofert pracy
 
     ContractType ||--o{ JobOffer : contract_type
     Department ||--o{ JobOffer : department
@@ -248,7 +248,7 @@
     JobOffer ||--o{ JobOfferBenefit : has
     Benefit ||--o{ JobOfferBenefit : assigned_to
 
-    %% Relacje procesu rekrutacyjnego
+%% Relacje procesu rekrutacyjnego
 
     RecruitmentProcess ||--o{ RecruitmentProcessVersion : has_versions
     RecruitmentProcessVersion ||--o{ ProcessStep : contains_steps
@@ -256,7 +256,7 @@
     RecruitmentProcessVersion ||--o{ JobOffer : used_by_offer
     RecruitmentProcessVersion ||--o{ JobApplication : followed_by_application
 
-    %% Relacje aplikacji kandydata
+%% Relacje aplikacji kandydata
 
     JobApplication ||--o{ JobApplicationStep : has_steps
     ProcessStep ||--o{ JobApplicationStep : instantiated_as
@@ -264,7 +264,7 @@
     JobApplication ||--o{ Attachment : contains
 
     JobApplication ||--o{ Interview : has_interviews
-    JobApplicationStep ||--o{ Interview : interview_for_step
+    JobApplicationStep ||--|| Interview : interview_for_step
 ```
 
 Project structure

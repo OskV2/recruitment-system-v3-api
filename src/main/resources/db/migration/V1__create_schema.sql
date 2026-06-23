@@ -402,6 +402,9 @@ CREATE TABLE interview
         FOREIGN KEY (job_application_id)
             REFERENCES job_application (id),
 
+    CONSTRAINT uq_interview_job_application_step
+        UNIQUE (job_application_step_id),
+
     CONSTRAINT fk_interview_job_application_step
         FOREIGN KEY (job_application_step_id)
             REFERENCES job_application_step (id),

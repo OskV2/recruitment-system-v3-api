@@ -26,11 +26,11 @@ public class Interview {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "job_application_id")
     private JobApplication jobApplication;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "job_application_step_id")
     private JobApplicationStep jobApplicationStep;
 
