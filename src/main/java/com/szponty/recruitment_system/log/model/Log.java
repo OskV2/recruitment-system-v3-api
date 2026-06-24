@@ -1,5 +1,6 @@
 package com.szponty.recruitment_system.log.model;
 
+import com.szponty.recruitment_system.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -25,6 +26,10 @@ public class Log {
     private String trigger;
 
     private String type;
+
+    @ManyToOne
+    @JoinColumn(name = "created_by_id", nullable = false)
+    private User createdBy;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
