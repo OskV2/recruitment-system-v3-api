@@ -1,6 +1,7 @@
 package com.szponty.recruitment_system.user.service;
 
 
+import com.szponty.recruitment_system.auth.service.LoggedUserService;
 import com.szponty.recruitment_system.dictionary.model.Department;
 import com.szponty.recruitment_system.dictionary.repository.DepartmentRepository;
 import com.szponty.recruitment_system.event.model.UserCreatedEvent;
@@ -16,7 +17,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -27,6 +27,7 @@ public class UserService {
     private final DepartmentRepository departmentRepository;
     private final UserMapper userMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final LoggedUserService loggedUserService;
 
     public UserResponse getUserById(UUID id) {
         User user = userRepository.findById(id)
@@ -61,14 +62,18 @@ public class UserService {
                         new IllegalArgumentException("Department with id " + departmentId + " not found"));
 
         User user = userRepository.save(userMapper.toEntity(request, role, department));
+        User createdBy = loggedUserService.getCurrentUser();
 
         eventPublisher.publishEvent(new UserCreatedEvent(
-            user.getId(), user.getFirstName() + " " + user.getLastName()
+            createdBy, user.getFirstName(), user.getLastName(), user.getEmail(), user.getRole(), user.getDepartment()
         ));
 
         return userMapper.toResponse(user);
     }
 
+//    public UserResponse updateUser(CreateUserRequest request) {
+//
+//    }
 
     private UUID parseUuid(String id, String fieldName) {
         try {

@@ -4,6 +4,7 @@ import com.szponty.recruitment_system.log.model.Log;
 import com.szponty.recruitment_system.log.model.LogTrigger;
 import com.szponty.recruitment_system.log.model.LogType;
 import com.szponty.recruitment_system.log.repository.LogRepository;
+import com.szponty.recruitment_system.user.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,12 +14,12 @@ public class LogService {
 
     private final LogRepository logRepository;
 
-    public void createLog(String message, LogTrigger trigger, LogType type) {
-
+    public void createLog(User createdBy, String message, LogTrigger trigger, LogType type) {
         Log log = Log.builder()
-                    .message(message)
-                    .trigger(String.valueOf(trigger))
-                    .type(String.valueOf(type))
+                .createdBy(createdBy)
+                .message(message)
+                .trigger(String.valueOf(trigger))
+                .type(String.valueOf(type))
                 .build();
 
         logRepository.save(log);
