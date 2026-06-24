@@ -14,6 +14,13 @@ public class LogService {
     private final LogRepository logRepository;
 
     public void createLog(String message, LogTrigger trigger, LogType type) {
-        logRepository.createLog(message, trigger, type);
+
+        Log log = Log.builder()
+                    .message(message)
+                    .trigger(String.valueOf(trigger))
+                    .type(String.valueOf(type))
+                .build();
+
+        logRepository.save(log);
     }
 }
