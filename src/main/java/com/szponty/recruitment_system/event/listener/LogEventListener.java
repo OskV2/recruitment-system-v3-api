@@ -1,7 +1,9 @@
 package com.szponty.recruitment_system.event.listener;
 
 import com.szponty.recruitment_system.event.model.UserCreatedEvent;
-import com.szponty.recruitment_system.event.model.UserUpdatedEvent;
+import com.szponty.recruitment_system.event.model.UserDepartmentChangedEvent;
+import com.szponty.recruitment_system.event.model.UserLockChangeEvent;
+import com.szponty.recruitment_system.event.model.UserRoleChangeEvent;
 import com.szponty.recruitment_system.log.model.LogTrigger;
 import com.szponty.recruitment_system.log.model.LogType;
 import com.szponty.recruitment_system.log.service.LogService;
@@ -28,11 +30,39 @@ public class LogEventListener {
         );
     }
 
-    public void handle(UserUpdatedEvent event) {
+    @EventListener
+    public void handle(UserDepartmentChangedEvent event) {
         logService.createLog(
                 event.createdBy(),
-                "message",
+                "Department changed for user: " + event.firstName() +  " " + event.firstName() +
+                        ". Previous department: " + event.prevDepartment() +
+                        ". New department: " + event.newDepartment(),
                 LogTrigger.USER_DEPARTMENT_CHANGED,
+                LogType.INFO
+        );
+    }
+
+    @EventListener
+    public void handle(UserRoleChangeEvent event) {
+        logService.createLog(
+                event.createdBy(),
+                "Role changed for user: " + event.firstName() +  " " + event.firstName() +
+                        ". Previous role: " + event.prevRole() +
+                        ". New role: " + event.newRole(),
+                LogTrigger.USER_ROLE_CHANGED,
+                LogType.INFO
+        );
+    }
+
+    @EventListener
+    public void handle(UserLockChangeEvent event) {
+
+        String lockStateMessage = event.locked() ? "locked" : "unlocked";
+
+        logService.createLog(
+                event.createdBy(),
+                event.firstName() +  " " + event.firstName() + " has been " + lockStateMessage,
+                LogTrigger.USER_LOCK_CHANGE,
                 LogType.INFO
         );
     }
