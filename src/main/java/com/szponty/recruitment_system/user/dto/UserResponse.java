@@ -1,5 +1,8 @@
 package com.szponty.recruitment_system.user.dto;
 
+import com.szponty.recruitment_system.dictionary.model.Department;
+import com.szponty.recruitment_system.role.model.Role;
+
 import java.util.UUID;
 
 public record UserResponse(
@@ -7,6 +10,8 @@ public record UserResponse(
         String firstName,
         String lastName,
         String email,
-        String description
+        String description,
+        String departmentId,
+        String roleId
 ) {
 }
