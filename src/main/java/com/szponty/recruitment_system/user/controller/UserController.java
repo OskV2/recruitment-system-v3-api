@@ -1,8 +1,6 @@
 package com.szponty.recruitment_system.user.controller;
 
-import com.szponty.recruitment_system.user.dto.CreateUserRequest;
-import com.szponty.recruitment_system.user.dto.UpdateUserRequest;
-import com.szponty.recruitment_system.user.dto.UserResponse;
+import com.szponty.recruitment_system.user.dto.*;
 import com.szponty.recruitment_system.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -43,5 +41,18 @@ public class UserController {
     @PatchMapping("/{id}")
     public ResponseEntity<UserResponse> updateUser(@Valid @RequestBody UpdateUserRequest userRequest, @PathVariable UUID id) {
         return ResponseEntity.ok(userService.updateUser(id, userRequest));
+    }
+
+    @PatchMapping("/lock/{id}")
+    public ResponseEntity<UserResponse> lockUser(@RequestBody LockUserRequest userRequest, @PathVariable UUID id) {
+        LockUserResponse response = userService.changeUserLock(id, userRequest);
+
+        if (!response.changed()) {
+            return ResponseEntity
+                    .status(HttpStatus.NO_CONTENT)
+                    .build();
+        }
+
+        return ResponseEntity.ok(response.user());
     }
 }

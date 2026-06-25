@@ -6,9 +6,7 @@ import com.szponty.recruitment_system.dictionary.repository.DepartmentRepository
 import com.szponty.recruitment_system.event.model.*;
 import com.szponty.recruitment_system.role.model.Role;
 import com.szponty.recruitment_system.role.repository.RoleRepository;
-import com.szponty.recruitment_system.user.dto.CreateUserRequest;
-import com.szponty.recruitment_system.user.dto.UpdateUserRequest;
-import com.szponty.recruitment_system.user.dto.UserResponse;
+import com.szponty.recruitment_system.user.dto.*;
 import com.szponty.recruitment_system.user.mapper.UserMapper;
 import com.szponty.recruitment_system.user.model.User;
 import com.szponty.recruitment_system.user.repository.UserRepository;
@@ -112,6 +110,26 @@ public class UserService {
         }
 
         return userMapper.toResponse(savedUser);
+    }
+
+    public LockUserResponse changeUserLock(UUID userId, LockUserRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user id"));
+
+        if (user.isLocked() == request.locked()) {
+            return new LockUserResponse(userMapper.toResponse(user), false);
+        }
+
+        user.setLocked(request.locked());
+
+        User savedUser = userRepository.save(user);
+        User createdBy = loggedUserService.getCurrentUser();
+
+        eventPublisher.publishEvent(new UserLockChangeEvent(
+                createdBy, savedUser.getFirstName(), savedUser.getLastName(), request.locked()
+        ));
+
+        return new LockUserResponse(userMapper.toResponse(user), true);
     }
 
     private UUID parseUuid(String id, String fieldName) {

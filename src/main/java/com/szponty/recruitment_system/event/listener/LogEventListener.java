@@ -63,7 +63,7 @@ public class LogEventListener {
                 event.createdBy(),
                 event.firstName() +  " " + event.firstName() + " has been " + lockStateMessage,
                 LogTrigger.USER_LOCK_CHANGE,
-                LogType.INFO
+                LogType.WARNING
         );
     }
 }

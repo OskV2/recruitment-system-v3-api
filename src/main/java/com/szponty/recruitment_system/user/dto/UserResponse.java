@@ -11,6 +11,7 @@ public record UserResponse(
         String lastName,
         String email,
         String description,
+        boolean locked,
         String departmentId,
         String roleId
 ) {

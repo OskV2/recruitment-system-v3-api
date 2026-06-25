@@ -19,6 +19,7 @@ public class UserMapper {
                 user.getFirstName(),
                 user.getEmail(),
                 user.getDescription(),
+                user.isLocked(),
                 user.getDepartment().getId().toString(),
                 user.getRole().getId().toString()
         );
