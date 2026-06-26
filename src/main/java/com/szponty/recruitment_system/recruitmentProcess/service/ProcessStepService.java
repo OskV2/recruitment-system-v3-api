@@ -23,6 +23,13 @@ public class ProcessStepService {
 
     private final ProcessStepMapper processStepMapper;
 
+    public ProcessStepResponse getProcessStepById(UUID processStepId) {
+        ProcessStep processStep = processStepRepository.findById(processStepId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "ProcessStep " + processStepId + " not found"));
+
+        return processStepMapper.toResponse(processStep);
+    }
 
     public ProcessStepResponse createProcessStep(CreateProcessStepRequest request) {
         RecruitmentProcessVersion recruitmentProcessVersion = recruitmentProcessVersionRepository
@@ -43,10 +50,10 @@ public class ProcessStepService {
     }
 
     @Transactional
-    public ProcessStepResponse updateProcessStep(UpdateProcessStepRequest request) {
-        ProcessStep processStep = processStepRepository.findById(request.id())
+    public ProcessStepResponse updateProcessStep(UUID processStepId, UpdateProcessStepRequest request) {
+        ProcessStep processStep = processStepRepository.findById(processStepId)
                 .orElseThrow(() -> new IllegalArgumentException(
-                        "ProcessStep " + request.id() + " not found"));
+                        "ProcessStep " + processStepId + " not found"));
 
 
         if (request.name() != null) {
@@ -83,5 +90,19 @@ public class ProcessStepService {
         }
 
         processStep.setDeleted(true);
+    }
+
+    public void restoreProcessStep(UUID id) {
+        ProcessStep processStep = processStepRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "ProcessStep " + id + " not found"));
+
+        if (!processStep.isDeleted()) {
+            throw new IllegalArgumentException(
+                    "ProcessStep " + id + " is not deleted"
+            );
+        }
+
+        processStep.setDeleted(false);
     }
 }
