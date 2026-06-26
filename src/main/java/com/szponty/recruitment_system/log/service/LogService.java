@@ -18,8 +18,8 @@ public class LogService {
         Log log = Log.builder()
                 .createdBy(createdBy)
                 .message(message)
-                .trigger(String.valueOf(trigger))
-                .type(String.valueOf(type))
+                .trigger(trigger)
+                .type(type)
                 .build();
 
         logRepository.save(log);

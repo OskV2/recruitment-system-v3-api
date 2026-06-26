@@ -34,6 +34,36 @@ CREATE TYPE interview_status AS ENUM (
     'RESCHEDULED'
 );
 
+CREATE TYPE log_type AS ENUM (
+    'INFO',
+    'WARNING',
+    'SUCCESS'
+);
+
+CREATE TYPE log_trigger AS ENUM (
+    'JOB_OFFER_CREATED',
+    'JOB_OFFER_UPDATED',
+    'JOB_OFFER_STATUS_CHANGED',
+    'LOCATION',
+    'DEPARTMENT',
+    'WORK_MODEL',
+    'FULL_TIME_EQUIVALENT',
+    'CONTRACT_TYPE',
+    'RECRUITMENT_STEP_CREATED',
+    'RECRUITMENT_STEP_UPDATED',
+    'RECRUITMENT_STEP_DELETED',
+    'RECRUITMENT_PROCESS_CREATED',
+    'RECRUITMENT_PROCESS_UPDATED',
+    'RECRUITMENT_PROCESS_DELETED',
+    'USER_CREATED',
+    'USER_DEPARTMENT_CHANGED',
+    'USER_ROLE_CHANGED',
+    'USER_LOCK_CHANGE',
+    'ROLE_CREATED',
+    'ROLE_UPDATED',
+    'ROLE_DELETED'
+);
+
 CREATE TABLE role
 (
     id                          UUID PRIMARY KEY      DEFAULT gen_random_uuid(),
@@ -419,8 +449,8 @@ CREATE TABLE log
 (
     id            UUID PRIMARY KEY      DEFAULT gen_random_uuid(),
     message       VARCHAR(255) NOT NULL,
-    trigger       VARCHAR(255) NOT NULL,
-    type          VARCHAR(100) NOT NULL,
+    trigger       log_trigger  NOT NULL,
+    type          log_type     NOT NULL DEFAULT 'INFO',
     created_by_id UUID         NOT NULL,
 
     created_at    TIMESTAMP    NOT NULL DEFAULT NOW(),
