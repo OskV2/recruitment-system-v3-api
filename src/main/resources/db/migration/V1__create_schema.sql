@@ -1,4 +1,5 @@
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE
+EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TYPE offer_status AS ENUM (
     'DRAFT',
@@ -33,36 +34,66 @@ CREATE TYPE interview_status AS ENUM (
     'RESCHEDULED'
 );
 
+CREATE TYPE log_type AS ENUM (
+    'INFO',
+    'WARNING',
+    'SUCCESS'
+);
+
+CREATE TYPE log_trigger AS ENUM (
+    'JOB_OFFER_CREATED',
+    'JOB_OFFER_UPDATED',
+    'JOB_OFFER_STATUS_CHANGED',
+    'LOCATION',
+    'DEPARTMENT',
+    'WORK_MODEL',
+    'FULL_TIME_EQUIVALENT',
+    'CONTRACT_TYPE',
+    'RECRUITMENT_STEP_CREATED',
+    'RECRUITMENT_STEP_UPDATED',
+    'RECRUITMENT_STEP_DELETED',
+    'RECRUITMENT_PROCESS_CREATED',
+    'RECRUITMENT_PROCESS_UPDATED',
+    'RECRUITMENT_PROCESS_DELETED',
+    'USER_CREATED',
+    'USER_DEPARTMENT_CHANGED',
+    'USER_ROLE_CHANGED',
+    'USER_LOCK_CHANGE',
+    'ROLE_CREATED',
+    'ROLE_UPDATED',
+    'ROLE_DELETED'
+);
+
 CREATE TABLE role
 (
-    id                          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id                          UUID PRIMARY KEY      DEFAULT gen_random_uuid(),
     name                        VARCHAR(255) NOT NULL,
     description                 VARCHAR(1000),
 
-    can_manage_job_applications BOOLEAN NOT NULL DEFAULT FALSE,
+    can_manage_job_applications BOOLEAN      NOT NULL DEFAULT FALSE,
 
-    can_add_new_offer           BOOLEAN NOT NULL DEFAULT FALSE,
-    can_edit_existing_offer     BOOLEAN NOT NULL DEFAULT FALSE,
-    can_view_all_offers         BOOLEAN NOT NULL DEFAULT FALSE,
+    can_add_new_offer           BOOLEAN      NOT NULL DEFAULT FALSE,
+    can_edit_existing_offer     BOOLEAN      NOT NULL DEFAULT FALSE,
+    can_view_all_offers         BOOLEAN      NOT NULL DEFAULT FALSE,
 
-    can_manage_users            BOOLEAN NOT NULL DEFAULT FALSE,
-    can_manage_roles            BOOLEAN NOT NULL DEFAULT FALSE,
+    can_manage_users            BOOLEAN      NOT NULL DEFAULT FALSE,
+    can_manage_roles            BOOLEAN      NOT NULL DEFAULT FALSE,
 
-    can_view_logs               BOOLEAN NOT NULL DEFAULT FALSE,
-    deleted                     BOOLEAN NOT NULL DEFAULT FALSE,
+    can_view_logs               BOOLEAN      NOT NULL DEFAULT FALSE,
+    deleted                     BOOLEAN      NOT NULL DEFAULT FALSE,
 
-    created_at                  TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at                  TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_at                  TIMESTAMP    NOT NULL DEFAULT NOW(),
+    updated_at                  TIMESTAMP    NOT NULL DEFAULT NOW(),
 
     CONSTRAINT uq_role_name UNIQUE (name)
 );
 
 CREATE TABLE department
 (
-    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id          UUID PRIMARY KEY   DEFAULT gen_random_uuid(),
     name        VARCHAR(255),
     description VARCHAR(1000),
-    deleted     BOOLEAN NOT NULL DEFAULT FALSE,
+    deleted     BOOLEAN   NOT NULL DEFAULT FALSE,
 
     created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMP NOT NULL DEFAULT NOW()
@@ -70,19 +101,19 @@ CREATE TABLE department
 
 CREATE TABLE app_user
 (
-    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id            UUID PRIMARY KEY      DEFAULT gen_random_uuid(),
     first_name    VARCHAR(100) NOT NULL,
     last_name     VARCHAR(100) NOT NULL,
     email         VARCHAR(255) NOT NULL,
     password      VARCHAR(255) NOT NULL,
     description   VARCHAR(255) NOT NULL,
-    locked        BOOLEAN NOT NULL,
+    locked        BOOLEAN      NOT NULL,
 
-    role_id       UUID NOT NULL,
-    department_id UUID NOT NULL,
+    role_id       UUID         NOT NULL,
+    department_id UUID         NOT NULL,
 
-    created_at    TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at    TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_at    TIMESTAMP    NOT NULL DEFAULT NOW(),
+    updated_at    TIMESTAMP    NOT NULL DEFAULT NOW(),
 
     CONSTRAINT uq_app_user_email UNIQUE (email),
 
@@ -97,71 +128,71 @@ CREATE TABLE app_user
 
 CREATE TABLE contract_type
 (
-    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id          UUID PRIMARY KEY     DEFAULT gen_random_uuid(),
     name        VARCHAR(50) NOT NULL,
     description VARCHAR(255),
-    deleted     BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMP NOT NULL DEFAULT NOW()
+    deleted     BOOLEAN     NOT NULL DEFAULT FALSE,
+    created_at  TIMESTAMP   NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMP   NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE location
 (
-    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id          UUID PRIMARY KEY      DEFAULT gen_random_uuid(),
     city        VARCHAR(100) NOT NULL,
     country     VARCHAR(100) NOT NULL,
     description VARCHAR(1000),
-    deleted     BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMP NOT NULL DEFAULT NOW()
+    deleted     BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at  TIMESTAMP    NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMP    NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE full_time_equivalent
 (
-    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id          UUID PRIMARY KEY     DEFAULT gen_random_uuid(),
     name        VARCHAR(50) NOT NULL,
     description VARCHAR(255),
-    deleted     BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMP NOT NULL DEFAULT NOW()
+    deleted     BOOLEAN     NOT NULL DEFAULT FALSE,
+    created_at  TIMESTAMP   NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMP   NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE work_model
 (
-    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id          UUID PRIMARY KEY     DEFAULT gen_random_uuid(),
     name        VARCHAR(50) NOT NULL,
     description VARCHAR(255),
-    deleted     BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMP NOT NULL DEFAULT NOW()
+    deleted     BOOLEAN     NOT NULL DEFAULT FALSE,
+    created_at  TIMESTAMP   NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMP   NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE benefit
 (
-    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id          UUID PRIMARY KEY     DEFAULT gen_random_uuid(),
     name        VARCHAR(50) NOT NULL,
     description VARCHAR(255),
-    deleted     BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMP NOT NULL DEFAULT NOW()
+    deleted     BOOLEAN     NOT NULL DEFAULT FALSE,
+    created_at  TIMESTAMP   NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMP   NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE recruitment_process
 (
-    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id          UUID PRIMARY KEY      DEFAULT gen_random_uuid(),
     name        VARCHAR(100) NOT NULL,
     description VARCHAR(255),
-    deleted     BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMP NOT NULL DEFAULT NOW()
+    deleted     BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at  TIMESTAMP    NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMP    NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE recruitment_process_version
 (
-    id                     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    recruitment_process_id UUID NOT NULL,
-    version                UUID DEFAULT gen_random_uuid(),
-    active                 BOOLEAN NOT NULL DEFAULT FALSE,
+    id                     UUID PRIMARY KEY   DEFAULT gen_random_uuid(),
+    recruitment_process_id UUID      NOT NULL,
+    version                UUID               DEFAULT gen_random_uuid(),
+    active                 BOOLEAN   NOT NULL DEFAULT FALSE,
     created_at             TIMESTAMP NOT NULL DEFAULT NOW(),
 
     CONSTRAINT fk_recruitment_process_version_process
@@ -172,36 +203,36 @@ CREATE TABLE recruitment_process_version
 
 CREATE TABLE job_offer
 (
-    id                             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id                             UUID PRIMARY KEY      DEFAULT gen_random_uuid(),
     name                           VARCHAR(255) NOT NULL,
     description                    VARCHAR(255) NOT NULL,
 
-    salary_from                    INT NOT NULL,
-    salary_to                      INT NOT NULL,
-    currency                       VARCHAR(4) NOT NULL,
+    salary_from                    INT          NOT NULL,
+    salary_to                      INT          NOT NULL,
+    currency                       VARCHAR(4)   NOT NULL,
 
-    contract_type_id               UUID NOT NULL,
-    location_id                    UUID NOT NULL,
-    full_time_equivalent_id        UUID NOT NULL,
-    work_model_id                  UUID NOT NULL,
-    department_id                  UUID NOT NULL,
+    contract_type_id               UUID         NOT NULL,
+    location_id                    UUID         NOT NULL,
+    full_time_equivalent_id        UUID         NOT NULL,
+    work_model_id                  UUID         NOT NULL,
+    department_id                  UUID         NOT NULL,
 
     must_have_requirements         TEXT[] NOT NULL,
     nice_to_have_requirements      TEXT[] NOT NULL,
 
-    valid_from                     TIMESTAMP NOT NULL,
-    valid_to                       TIMESTAMP NOT NULL,
+    valid_from                     TIMESTAMP    NOT NULL,
+    valid_to                       TIMESTAMP    NOT NULL,
 
     offer_status                   offer_status NOT NULL DEFAULT 'DRAFT',
-    vacancy                        INT NOT NULL,
+    vacancy                        INT          NOT NULL,
 
-    recruitment_process_version_id UUID NOT NULL,
-    recruiter_id                   UUID NOT NULL,
-    substitute_recruiter_id        UUID NOT NULL,
+    recruitment_process_version_id UUID         NOT NULL,
+    recruiter_id                   UUID         NOT NULL,
+    substitute_recruiter_id        UUID         NOT NULL,
 
-    deleted                        BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at                     TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at                     TIMESTAMP NOT NULL DEFAULT NOW(),
+    deleted                        BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at                     TIMESTAMP    NOT NULL DEFAULT NOW(),
+    updated_at                     TIMESTAMP    NOT NULL DEFAULT NOW(),
 
     CONSTRAINT fk_job_offer_contract_type
         FOREIGN KEY (contract_type_id)
@@ -258,18 +289,18 @@ CREATE TABLE job_offer_benefit
 
 CREATE TABLE process_step
 (
-    id                           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    process_version_id           UUID NOT NULL,
-    step_order                   INT NOT NULL,
+    id                           UUID PRIMARY KEY     DEFAULT gen_random_uuid(),
+    process_version_id           UUID        NOT NULL,
+    step_order                   INT         NOT NULL,
     name                         VARCHAR(50) NOT NULL,
     description                  VARCHAR(255),
 
-    requires_interview           BOOLEAN NOT NULL DEFAULT FALSE,
-    requires_department_approval BOOLEAN NOT NULL DEFAULT FALSE,
+    requires_interview           BOOLEAN     NOT NULL DEFAULT FALSE,
+    requires_department_approval BOOLEAN     NOT NULL DEFAULT FALSE,
 
-    deleted                      BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at                   TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at                   TIMESTAMP NOT NULL DEFAULT NOW(),
+    deleted                      BOOLEAN     NOT NULL DEFAULT FALSE,
+    created_at                   TIMESTAMP   NOT NULL DEFAULT NOW(),
+    updated_at                   TIMESTAMP   NOT NULL DEFAULT NOW(),
 
     CONSTRAINT fk_process_step_recruitment_process_version
         FOREIGN KEY (process_version_id)
@@ -281,23 +312,23 @@ CREATE TABLE process_step
 
 CREATE TABLE job_application
 (
-    id                             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    public_token                   UUID NOT NULL,
-    job_offer_id                   UUID NOT NULL,
-    recruitment_process_version_id UUID NOT NULL,
+    id                             UUID PRIMARY KEY                DEFAULT gen_random_uuid(),
+    public_token                   UUID                   NOT NULL,
+    job_offer_id                   UUID                   NOT NULL,
+    recruitment_process_version_id UUID                   NOT NULL,
 
-    first_name                     VARCHAR(50) NOT NULL,
-    last_name                      VARCHAR(50) NOT NULL,
-    email                          VARCHAR(100) NOT NULL,
+    first_name                     VARCHAR(50)            NOT NULL,
+    last_name                      VARCHAR(50)            NOT NULL,
+    email                          VARCHAR(100)           NOT NULL,
 
     phone_number                   VARCHAR(30),
     github_link                    VARCHAR(255),
 
     status                         job_application_status NOT NULL DEFAULT 'SUBMITTED',
 
-    deleted                        BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at                     TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at                     TIMESTAMP NOT NULL DEFAULT NOW(),
+    deleted                        BOOLEAN                NOT NULL DEFAULT FALSE,
+    created_at                     TIMESTAMP              NOT NULL DEFAULT NOW(),
+    updated_at                     TIMESTAMP              NOT NULL DEFAULT NOW(),
 
     CONSTRAINT uq_job_application_public_token
         UNIQUE (public_token),
@@ -314,15 +345,15 @@ CREATE TABLE job_application
 
 CREATE TABLE job_application_step
 (
-    id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    application_id       UUID NOT NULL,
-    process_step_id      UUID NOT NULL,
+    id                   UUID PRIMARY KEY                 DEFAULT gen_random_uuid(),
+    application_id       UUID                    NOT NULL,
+    process_step_id      UUID                    NOT NULL,
 
-    step_order           INT NOT NULL,
+    step_order           INT                     NOT NULL,
     status               application_step_status NOT NULL DEFAULT 'WAITING',
 
-    started_at           TIMESTAMP NOT NULL,
-    started_by_user_id   UUID NOT NULL,
+    started_at           TIMESTAMP               NOT NULL,
+    started_by_user_id   UUID                    NOT NULL,
 
     completed_at         TIMESTAMP,
     completed_by_user_id UUID,
@@ -333,9 +364,9 @@ CREATE TABLE job_application_step
     decision_comment     VARCHAR(100),
     rejection_reason     VARCHAR(100),
 
-    deleted              BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at           TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at           TIMESTAMP NOT NULL DEFAULT NOW(),
+    deleted              BOOLEAN                 NOT NULL DEFAULT FALSE,
+    created_at           TIMESTAMP               NOT NULL DEFAULT NOW(),
+    updated_at           TIMESTAMP               NOT NULL DEFAULT NOW(),
 
     CONSTRAINT fk_job_application_step_application
         FOREIGN KEY (application_id)
@@ -360,17 +391,17 @@ CREATE TABLE job_application_step
 
 CREATE TABLE attachment
 (
-    id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id                 UUID PRIMARY KEY      DEFAULT gen_random_uuid(),
     original_name      VARCHAR(255) NOT NULL,
     stored_name        VARCHAR(255) NOT NULL,
     path               VARCHAR(255) NOT NULL,
-    is_cv              BOOLEAN NOT NULL,
+    is_cv              BOOLEAN      NOT NULL,
 
-    job_application_id UUID NOT NULL,
+    job_application_id UUID         NOT NULL,
 
-    deleted            BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at         TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at         TIMESTAMP NOT NULL DEFAULT NOW(),
+    deleted            BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at         TIMESTAMP    NOT NULL DEFAULT NOW(),
+    updated_at         TIMESTAMP    NOT NULL DEFAULT NOW(),
 
     CONSTRAINT fk_attachment_job_application
         FOREIGN KEY (job_application_id)
@@ -379,24 +410,24 @@ CREATE TABLE attachment
 
 CREATE TABLE interview
 (
-    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id                      UUID PRIMARY KEY          DEFAULT gen_random_uuid(),
 
-    job_application_id      UUID NOT NULL,
-    job_application_step_id UUID NOT NULL,
-    recruiter_id            UUID NOT NULL,
+    job_application_id      UUID             NOT NULL,
+    job_application_step_id UUID             NOT NULL,
+    recruiter_id            UUID             NOT NULL,
 
-    scheduled_start         TIMESTAMP NOT NULL,
-    scheduled_end           TIMESTAMP NOT NULL,
+    scheduled_start         TIMESTAMP        NOT NULL,
+    scheduled_end           TIMESTAMP        NOT NULL,
 
     status                  interview_status NOT NULL DEFAULT 'SCHEDULED',
 
-    location                VARCHAR(255) NOT NULL,
+    location                VARCHAR(255)     NOT NULL,
     meeting_url             VARCHAR(1000),
     notes                   VARCHAR(255),
 
-    deleted                 BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at              TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at              TIMESTAMP NOT NULL DEFAULT NOW(),
+    deleted                 BOOLEAN          NOT NULL DEFAULT FALSE,
+    created_at              TIMESTAMP        NOT NULL DEFAULT NOW(),
+    updated_at              TIMESTAMP        NOT NULL DEFAULT NOW(),
 
     CONSTRAINT fk_interview_job_application
         FOREIGN KEY (job_application_id)
@@ -416,10 +447,17 @@ CREATE TABLE interview
 
 CREATE TABLE log
 (
-    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    message    VARCHAR(255) NOT NULL,
-    trigger    VARCHAR(255) NOT NULL,
-    type       VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    id            UUID PRIMARY KEY      DEFAULT gen_random_uuid(),
+    message       VARCHAR(255) NOT NULL,
+    trigger       log_trigger  NOT NULL,
+    type          log_type     NOT NULL DEFAULT 'INFO',
+    created_by_id UUID         NOT NULL,
+
+    created_at    TIMESTAMP    NOT NULL DEFAULT NOW(),
+    updated_at    TIMESTAMP    NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_user
+        FOREIGN KEY (created_by_id)
+            REFERENCES app_user (id)
+            ON DELETE CASCADE
 );
