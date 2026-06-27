@@ -14,7 +14,7 @@ public interface DictionaryRepository<T extends DictionaryEntity>
 
     List<T> findAllByDeletedFalse();
 
-    Optional<T> findByIdDeletedFalse(UUID id);
+    Optional<T> findByIdAndDeletedFalse(UUID id);
 
     boolean existsByNameIgnoreCaseAndDeletedFalse(String name);
 }

@@ -24,7 +24,7 @@ public abstract class AbstractDictionaryService<T extends DictionaryEntity> {
     }
 
     public DictionaryItemResponse getById(UUID id) {
-        T entity = repository.findByIdDeletedFalse(id)
+        T entity = repository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new IllegalArgumentException("Dictionary item not found"));
 
         return dictionaryMapper.toDictionaryItemResponse(entity);

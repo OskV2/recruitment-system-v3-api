@@ -33,7 +33,7 @@ public abstract class AbstractDictionaryController<T extends DictionaryEntity> {
         return ResponseEntity.ok(service.create(request));
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<DictionaryItemResponse> update(
             @PathVariable UUID id,
             @RequestBody DictionaryItemRequest request

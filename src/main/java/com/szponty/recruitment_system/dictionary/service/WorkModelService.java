@@ -5,7 +5,9 @@ import com.szponty.recruitment_system.dictionary.model.FullTimeEquivalent;
 import com.szponty.recruitment_system.dictionary.model.WorkModel;
 import com.szponty.recruitment_system.dictionary.repository.FullTimeEquivalentRepository;
 import com.szponty.recruitment_system.dictionary.repository.WorkModelRepository;
+import org.springframework.stereotype.Service;
 
+@Service
 public class WorkModelService extends AbstractDictionaryService<WorkModel> {
     public WorkModelService (
             WorkModelRepository repository,
