@@ -16,7 +16,7 @@ import java.util.UUID;
 @Setter
 @Builder
 @Table(name = "full_time_equivalent")
-public class FullTimeEquivalent {
+public class FullTimeEquivalent implements DictionaryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -25,7 +25,7 @@ public class FullTimeEquivalent {
     private String description;
 
     @ColumnDefault("false")
-    private Boolean deleted;
+    private boolean deleted;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

@@ -23,6 +23,7 @@ public class Location {
 
     private String city;
     private String country;
+    private String description;
 
     @ColumnDefault("false")
     private Boolean deleted;

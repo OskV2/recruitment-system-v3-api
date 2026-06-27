@@ -16,7 +16,7 @@ import java.util.UUID;
 @Setter
 @Builder
 @Table(name = "work_model")
-public class WorkModel {
+public class WorkModel implements DictionaryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -25,7 +25,7 @@ public class WorkModel {
     private String description;
 
     @ColumnDefault("false")
-    private Boolean deleted;
+    private boolean deleted;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

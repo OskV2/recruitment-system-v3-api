@@ -20,7 +20,7 @@ import java.util.UUID;
 @Setter
 @Builder
 @Table(name = "department")
-public class Department {
+public class Department implements DictionaryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
