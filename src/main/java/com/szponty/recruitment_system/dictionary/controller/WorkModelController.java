@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/dictionaries/work-model")
+@RequestMapping("/api/dictionary/work-model")
 public class WorkModelController extends AbstractDictionaryController<WorkModel> {
     public WorkModelController(WorkModelService service) {
         super(service);
