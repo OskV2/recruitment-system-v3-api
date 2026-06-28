@@ -19,14 +19,14 @@ public class LocationService {
     private final DictionaryMapper dictionaryMapper;
 
     public List<LocationResponse> getAllLocations() {
-        return locationRepository.findAll()
+        return locationRepository.findAllByDeletedFalse()
                 .stream()
                 .map(dictionaryMapper::toLocationResponse)
                 .toList();
     }
 
     public LocationResponse getLocationById(UUID locationId) {
-        Location location = locationRepository.findByIdAndDeletedFalse()
+        Location location = locationRepository.findByIdAndDeletedFalse(locationId)
                 .orElseThrow(() -> new IllegalArgumentException("Location not found."));
 
         return dictionaryMapper.toLocationResponse(location);
@@ -34,13 +34,28 @@ public class LocationService {
     }
 
     public LocationResponse createLocation(LocationRequest request) {
+        Location location = locationRepository.save(dictionaryMapper.toCreateLocationEntity(request));
 
+        return dictionaryMapper.toLocationResponse(location);
     }
 
     public LocationResponse updateLocation(UUID locationId, LocationRequest request) {
+        Location location = locationRepository.findByIdAndDeletedFalse(locationId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid location id"));
 
+        dictionaryMapper.toUpdateLocationEntity(request, location);
+
+        Location savedLocation = locationRepository.save(location);
+
+        return dictionaryMapper.toLocationResponse(savedLocation);
     }
 
-    public void deleteLocation() {}
+    public void deleteLocation(UUID locationId) {
+        Location location = locationRepository.findByIdAndDeletedFalse(locationId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid location id"));
+
+        location.setDeleted(true);
+        locationRepository.save(location);
+    }
 
 }

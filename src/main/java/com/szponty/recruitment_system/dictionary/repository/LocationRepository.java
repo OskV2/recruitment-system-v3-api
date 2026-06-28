@@ -10,5 +10,5 @@ import java.util.UUID;
 public interface LocationRepository extends JpaRepository<Location, UUID> {
     List<Location> findAllByDeletedFalse();
 
-    Optional<Location> findByIdAndDeletedFalse();
+    Optional<Location> findByIdAndDeletedFalse(UUID locationId);
 }
