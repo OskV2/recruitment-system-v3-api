@@ -10,6 +10,7 @@ import com.szponty.recruitment_system.recruitmentProcess.repository.ProcessStepR
 import com.szponty.recruitment_system.recruitmentProcess.repository.RecruitmentProcessVersionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public class ProcessStepService {
         return processStepMapper.toResponse(processStep);
     }
 
-    public ProcessStepResponse createProcessStep(CreateProcessStepRequest request) {
+    public ProcessStepResponse createProcessStep(@NonNull CreateProcessStepRequest request) {
         RecruitmentProcessVersion recruitmentProcessVersion = recruitmentProcessVersionRepository
                 .findById(request.recruitmentProcessVersion())
                 .orElseThrow(() -> new IllegalArgumentException(
@@ -50,7 +51,7 @@ public class ProcessStepService {
     }
 
     @Transactional
-    public ProcessStepResponse updateProcessStep(UUID processStepId, UpdateProcessStepRequest request) {
+    public ProcessStepResponse updateProcessStep(UUID processStepId, @NonNull UpdateProcessStepRequest request) {
         ProcessStep processStep = processStepRepository.findById(processStepId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "ProcessStep " + processStepId + " not found"));

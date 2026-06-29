@@ -15,12 +15,17 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/recruitment-process")
+@RequestMapping("/api/recruitment-processes")
 public class RecruitmentProcessController {
     private final ProcessStepService processStepService;
 
     @GetMapping("/{id}/steps")
     public ResponseEntity<List<ProcessStepResponse>> getAllStepsByRecruitmentProcessId(@PathVariable UUID id) {
         return ResponseEntity.ok(processStepService.getProcessStepsByRecruitmentProcessVersionId(id));
+    }
+
+    @GetMapping("")
+    public ResponseEntity<List<ProcessStepResponse>> getAllRecruitmentProcesses() {
+
     }
 }
