@@ -24,6 +24,13 @@ public class ProcessStepService {
 
     private final ProcessStepMapper processStepMapper;
 
+    public List<ProcessStepResponse> getAllSteps(boolean deleted) {
+        return processStepRepository.findByDeleted(deleted)
+                .stream()
+                .map(processStepMapper::toResponse)
+                .toList();
+    }
+
     public ProcessStepResponse getProcessStepById(UUID processStepId) {
         ProcessStep processStep = processStepRepository.findById(processStepId)
                 .orElseThrow(() -> new IllegalArgumentException(
