@@ -215,8 +215,9 @@
     Log {
         uuid id PK
         string message
-        string trigger
-        string type
+        string trigger "ENUM"
+        string type "ENUM ('INFO', 'WARNING', 'SUCCESS')"
+        uuid created_by_id FK
         datetime createdAt
         datetime updatedAt
     }
@@ -234,6 +235,8 @@
     AppUser ||--o{ JobApplicationStep : started_step
     AppUser |o--o{ JobApplicationStep : completed_step
     AppUser |o--o{ JobApplicationStep : rejected_step
+    
+    AppUser ||--|{ Log : created_by_id
 
 %% Relacje ofert pracy
 

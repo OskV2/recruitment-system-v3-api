@@ -20,7 +20,7 @@ import java.util.UUID;
 @Setter
 @Builder
 @Table(name = "benefit")
-public class Benefit {
+public class Benefit implements DictionaryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -29,7 +29,7 @@ public class Benefit {
     private String description;
 
     @ColumnDefault("false")
-    private Boolean deleted;
+    private boolean deleted;
 
     @OneToMany(mappedBy = "benefit")
     private Set<JobOfferBenefit> jobOffers = new HashSet<>();
