@@ -100,6 +100,7 @@ public class ProcessStepService {
         processStep.setDeleted(true);
     }
 
+    @Transactional
     public void restoreProcessStep(UUID id) {
         ProcessStep processStep = processStepRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(

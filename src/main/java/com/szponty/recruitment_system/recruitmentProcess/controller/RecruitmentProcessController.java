@@ -24,8 +24,8 @@ public class RecruitmentProcessController {
         return ResponseEntity.ok(processStepService.getProcessStepsByRecruitmentProcessVersionId(id));
     }
 
-    @GetMapping("")
-    public ResponseEntity<List<ProcessStepResponse>> getAllRecruitmentProcesses() {
-
-    }
+//    @GetMapping("")
+//    public ResponseEntity<List<ProcessStepResponse>> getAllRecruitmentProcesses() {
+//
+//    }
 }
