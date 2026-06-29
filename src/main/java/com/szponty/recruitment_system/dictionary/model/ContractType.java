@@ -16,7 +16,7 @@ import java.util.UUID;
 @Setter
 @Builder
 @Table(name = "contract_type")
-public class ContractType {
+public class ContractType implements DictionaryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -25,7 +25,7 @@ public class ContractType {
     private String description;
 
     @ColumnDefault("false")
-    private Boolean deleted;
+    private boolean deleted;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

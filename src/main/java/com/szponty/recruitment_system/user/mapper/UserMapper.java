@@ -47,8 +47,6 @@ public class UserMapper {
             Role role,
             Department department
     ) {
-        if (userId != null) { user.setId(userId); }
-
         if (request.firstName() != null) { user.setFirstName(request.firstName()); }
 
         if (request.lastName() != null) {user.setLastName(request.lastName()); }
