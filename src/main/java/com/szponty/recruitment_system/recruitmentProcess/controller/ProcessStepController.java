@@ -20,7 +20,7 @@ public class ProcessStepController {
     private final ProcessStepService processStepService;
 
     @GetMapping
-    public ResponseEntity<List<ProcessStepResponse>> getProcessSteps(
+    public ResponseEntity<List<ProcessStepResponse>> getProcessSteps(                                  
             @RequestParam(defaultValue = "false") boolean deleted
     ) {
         return ResponseEntity.ok(processStepService.getAllSteps(deleted));

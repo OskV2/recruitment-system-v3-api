@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -17,6 +18,12 @@ public class RecruitmentProcessService {
     private final RecruitmentProcessRepository recruitmentProcessRepository;
     private final RecruitmentProcessMapper processMapper;
 
+    public List<RecruitmentProcessResponse> getAllRecruitmentProcesses() {
+        return recruitmentProcessRepository.findAll()
+                .stream()
+                .map(processMapper::toResponse)
+                .toList();
+    }
 
     public RecruitmentProcessResponse getRecruitmentProcessById(UUID id) {
         RecruitmentProcess recruitmentProcess = recruitmentProcessRepository.findById(id)
