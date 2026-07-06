@@ -31,8 +31,8 @@ public class JobOffer {
     private String name;
     private String description;
 
-    private int salaryFrom;
-    private int salaryTo;
+    private Integer salaryFrom;
+    private Integer salaryTo;
     private String currency;
 
     private String[] mustHaveRequirements;
@@ -73,7 +73,11 @@ public class JobOffer {
     @JoinColumn(name = "substitute_recruiter_id", nullable = false)
     private User substituteRecruiterId;
 
-    @OneToMany(mappedBy = "jobOffer")
+    @OneToMany(
+            mappedBy = "jobOffer",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true  //
+    )
     private Set<JobOfferBenefit> benefits = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
@@ -81,7 +85,8 @@ public class JobOffer {
     @Column(name = "offer_status", nullable = false, columnDefinition = "offer_status")
     @ColumnDefault("DRAFT")
     private JobOfferStatus offerStatus;
-    private int vacancy;
+
+    private Integer vacancy;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

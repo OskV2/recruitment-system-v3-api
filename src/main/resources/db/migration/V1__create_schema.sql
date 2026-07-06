@@ -269,12 +269,11 @@ CREATE TABLE job_offer
 
 CREATE TABLE job_offer_benefit
 (
-    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     job_offer_id UUID NOT NULL,
     benefit_id   UUID NOT NULL,
 
-    CONSTRAINT uq_job_offer_benefit
-        UNIQUE (job_offer_id, benefit_id),
+    CONSTRAINT pk_job_offer_benefit
+        PRIMARY KEY (job_offer_id, benefit_id),
 
     CONSTRAINT fk_job_offer_benefit_job_offer
         FOREIGN KEY (job_offer_id)

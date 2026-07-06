@@ -62,7 +62,6 @@
         uuid recruitmentProcessVersionId FK
         uuid recruiterId FK
         uuid substituteRecruiterId FK
-        boolean deleted
         datetime createdAt
         datetime updatedAt
     }
