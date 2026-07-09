@@ -1,6 +1,6 @@
-package com.szponty.recruitment_system.recruitmentProcess.repository;
+package com.szponty.recruitment_system.recruitmentprocess.repository;
 
-import com.szponty.recruitment_system.recruitmentProcess.model.ProcessStep;
+import com.szponty.recruitment_system.recruitmentprocess.model.ProcessStep;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

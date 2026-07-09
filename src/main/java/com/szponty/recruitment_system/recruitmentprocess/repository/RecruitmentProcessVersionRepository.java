@@ -1,7 +1,7 @@
-package com.szponty.recruitment_system.recruitmentProcess.repository;
+package com.szponty.recruitment_system.recruitmentprocess.repository;
 
-import com.szponty.recruitment_system.recruitmentProcess.model.RecruitmentProcess;
-import com.szponty.recruitment_system.recruitmentProcess.model.RecruitmentProcessVersion;
+import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcess;
+import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcessVersion;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -9,4 +9,5 @@ import java.util.UUID;
 
 public interface RecruitmentProcessVersionRepository extends JpaRepository<RecruitmentProcessVersion, UUID> {
     List<RecruitmentProcessVersion> findByRecruitmentProcess(RecruitmentProcess recruitmentProcess);
+    long countByRecruitmentProcessIdAndActiveTrue(UUID recruitmentProcessId);
 }

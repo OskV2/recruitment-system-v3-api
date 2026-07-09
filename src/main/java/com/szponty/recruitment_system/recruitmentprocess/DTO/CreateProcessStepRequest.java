@@ -1,4 +1,4 @@
-package com.szponty.recruitment_system.recruitmentProcess.DTO;
+package com.szponty.recruitment_system.recruitmentprocess.DTO;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

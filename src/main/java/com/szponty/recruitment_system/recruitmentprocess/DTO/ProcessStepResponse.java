@@ -1,4 +1,4 @@
-package com.szponty.recruitment_system.recruitmentProcess.DTO;
+package com.szponty.recruitment_system.recruitmentprocess.DTO;
 
 import lombok.Builder;
 

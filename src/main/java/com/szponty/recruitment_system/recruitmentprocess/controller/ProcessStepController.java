@@ -1,9 +1,9 @@
-package com.szponty.recruitment_system.recruitmentProcess.controller;
+package com.szponty.recruitment_system.recruitmentprocess.controller;
 
-import com.szponty.recruitment_system.recruitmentProcess.DTO.CreateProcessStepRequest;
-import com.szponty.recruitment_system.recruitmentProcess.DTO.ProcessStepResponse;
-import com.szponty.recruitment_system.recruitmentProcess.DTO.UpdateProcessStepRequest;
-import com.szponty.recruitment_system.recruitmentProcess.service.ProcessStepService;
+import com.szponty.recruitment_system.recruitmentprocess.DTO.CreateProcessStepRequest;
+import com.szponty.recruitment_system.recruitmentprocess.DTO.ProcessStepResponse;
+import com.szponty.recruitment_system.recruitmentprocess.DTO.UpdateProcessStepRequest;
+import com.szponty.recruitment_system.recruitmentprocess.service.ProcessStepService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

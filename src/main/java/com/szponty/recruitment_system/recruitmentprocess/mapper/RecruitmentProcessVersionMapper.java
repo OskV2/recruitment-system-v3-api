@@ -1,7 +1,7 @@
-package com.szponty.recruitment_system.recruitmentProcess.mapper;
+package com.szponty.recruitment_system.recruitmentprocess.mapper;
 
-import com.szponty.recruitment_system.recruitmentProcess.DTO.RecruitmentProcessVersionResponse;
-import com.szponty.recruitment_system.recruitmentProcess.model.RecruitmentProcessVersion;
+import com.szponty.recruitment_system.recruitmentprocess.DTO.RecruitmentProcessVersionResponse;
+import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcessVersion;
 import org.springframework.stereotype.Component;
 
 @Component

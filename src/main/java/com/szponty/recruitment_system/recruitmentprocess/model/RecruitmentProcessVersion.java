@@ -1,4 +1,4 @@
-package com.szponty.recruitment_system.recruitmentProcess.model;
+package com.szponty.recruitment_system.recruitmentprocess.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -6,6 +6,8 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -25,6 +27,14 @@ public class RecruitmentProcessVersion {
     private RecruitmentProcess recruitmentProcess;
 
     private UUID version;
+
+    @OneToMany(
+            mappedBy = "processVersion",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @Builder.Default
+    private List<ProcessStep> steps = new ArrayList<>();
 
     @ColumnDefault("false")
     private boolean active;

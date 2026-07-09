@@ -1,4 +1,5 @@
-package com.szponty.recruitment_system.recruitmentProcess.model;
+package com.szponty.recruitment_system.recruitmentprocess.model;
+
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -15,23 +16,14 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-@Table(name = "process_step")
-public class ProcessStep {
+@Table(name = "recruitment_process")
+public class RecruitmentProcess {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "process_version_id")
-    private RecruitmentProcessVersion processVersion;
-
     private String name;
     private String description;
-
-    @ColumnDefault("false")
-    private boolean requiresInterview;
-    @ColumnDefault("false")
-    private boolean requiresDepartmentApproval;
 
     @ColumnDefault("false")
     private boolean deleted;

@@ -1,10 +1,10 @@
-package com.szponty.recruitment_system.recruitmentProcess.service;
+package com.szponty.recruitment_system.recruitmentprocess.service;
 
-import com.szponty.recruitment_system.recruitmentProcess.DTO.CreateRecruitmentProcessRequest;
-import com.szponty.recruitment_system.recruitmentProcess.DTO.RecruitmentProcessResponse;
-import com.szponty.recruitment_system.recruitmentProcess.mapper.RecruitmentProcessMapper;
-import com.szponty.recruitment_system.recruitmentProcess.model.RecruitmentProcess;
-import com.szponty.recruitment_system.recruitmentProcess.repository.RecruitmentProcessRepository;
+import com.szponty.recruitment_system.recruitmentprocess.DTO.CreateRecruitmentProcessRequest;
+import com.szponty.recruitment_system.recruitmentprocess.DTO.RecruitmentProcessResponse;
+import com.szponty.recruitment_system.recruitmentprocess.mapper.RecruitmentProcessMapper;
+import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcess;
+import com.szponty.recruitment_system.recruitmentprocess.repository.RecruitmentProcessRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -55,6 +55,7 @@ public class RecruitmentProcessService {
         recruitmentProcess.setDeleted(true);
     }
 
+    @Transactional
     public void restoreRecruitmentProcess(UUID id) {
         RecruitmentProcess recruitmentProcess = recruitmentProcessRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException(

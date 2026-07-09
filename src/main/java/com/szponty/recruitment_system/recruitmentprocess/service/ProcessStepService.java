@@ -1,13 +1,13 @@
-package com.szponty.recruitment_system.recruitmentProcess.service;
+package com.szponty.recruitment_system.recruitmentprocess.service;
 
-import com.szponty.recruitment_system.recruitmentProcess.DTO.CreateProcessStepRequest;
-import com.szponty.recruitment_system.recruitmentProcess.DTO.ProcessStepResponse;
-import com.szponty.recruitment_system.recruitmentProcess.DTO.UpdateProcessStepRequest;
-import com.szponty.recruitment_system.recruitmentProcess.mapper.ProcessStepMapper;
-import com.szponty.recruitment_system.recruitmentProcess.model.ProcessStep;
-import com.szponty.recruitment_system.recruitmentProcess.model.RecruitmentProcessVersion;
-import com.szponty.recruitment_system.recruitmentProcess.repository.ProcessStepRepository;
-import com.szponty.recruitment_system.recruitmentProcess.repository.RecruitmentProcessVersionRepository;
+import com.szponty.recruitment_system.recruitmentprocess.DTO.CreateProcessStepRequest;
+import com.szponty.recruitment_system.recruitmentprocess.DTO.ProcessStepResponse;
+import com.szponty.recruitment_system.recruitmentprocess.DTO.UpdateProcessStepRequest;
+import com.szponty.recruitment_system.recruitmentprocess.mapper.ProcessStepMapper;
+import com.szponty.recruitment_system.recruitmentprocess.model.ProcessStep;
+import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcessVersion;
+import com.szponty.recruitment_system.recruitmentprocess.repository.ProcessStepRepository;
+import com.szponty.recruitment_system.recruitmentprocess.repository.RecruitmentProcessVersionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
