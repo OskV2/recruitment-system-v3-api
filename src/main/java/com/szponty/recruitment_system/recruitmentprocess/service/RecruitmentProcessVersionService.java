@@ -1,5 +1,8 @@
 package com.szponty.recruitment_system.recruitmentprocess.service;
 
+import com.szponty.recruitment_system.common.exception.InvalidEntityStateException;
+import com.szponty.recruitment_system.common.exception.LastActiveVersionException;
+import com.szponty.recruitment_system.common.exception.NotFoundException;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.CreateRecruitmentProcessVersionRequest;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.RecruitmentProcessVersionResponse;
 import com.szponty.recruitment_system.recruitmentprocess.mapper.RecruitmentProcessVersionMapper;
@@ -28,7 +31,7 @@ public class RecruitmentProcessVersionService {
     @Transactional(readOnly = true)
     public RecruitmentProcessVersionResponse getRecruitmentProcessVersionById(UUID id) {
         RecruitmentProcessVersion recruitmentProcessVersion = recruitmentProcessVersionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new NotFoundException(
                         "RecruitmentProcessVersion with id" + id + " was not found."
                 ));
 
@@ -38,7 +41,7 @@ public class RecruitmentProcessVersionService {
     @Transactional(readOnly = true)
     public List<RecruitmentProcessVersionResponse> getAllRecruitmentProcVersionsByRecruitmentProcessId(UUID id) {
         RecruitmentProcess recruitmentProcess = recruitmentProcessRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new NotFoundException(
                         "RecruitmentProcess with id " + id + " was not found."
                 ));
 
@@ -48,12 +51,13 @@ public class RecruitmentProcessVersionService {
                         .toList();
     }
 
+    @Transactional
     public RecruitmentProcessVersionResponse createRecruitmentProcessVersion(
         UUID recruitmentProcessId,
         CreateRecruitmentProcessVersionRequest request
     ) {
         RecruitmentProcess recruitmentProcess = recruitmentProcessRepository.findById(recruitmentProcessId)
-                .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new NotFoundException(
                         "RecruitmentProcess with id " + recruitmentProcessId + " was not found."
                 ));
 
@@ -78,7 +82,7 @@ public class RecruitmentProcessVersionService {
     @Transactional
     public void inactivateRecruitmentProcessVersion(UUID id) {
         RecruitmentProcessVersion recruitmentProcessVersion = recruitmentProcessVersionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new NotFoundException(
                         "RecruitmentProcessVersion " + id + " not found"
                 ));
 
@@ -88,13 +92,13 @@ public class RecruitmentProcessVersionService {
                 );
 
         if (activeVersions <= 1) {
-            throw new IllegalArgumentException(
+            throw new LastActiveVersionException(
                     "Recruitment process must have at least one active version."
             );
         }
 
         if (!recruitmentProcessVersion.isActive()) {
-            throw new IllegalArgumentException(
+            throw new InvalidEntityStateException(
                     "RecruitmentProcessVersion " + id + " already not active"
             );
         }
@@ -105,12 +109,12 @@ public class RecruitmentProcessVersionService {
     @Transactional
     public void activateRecruitmentProcessVersion(UUID id) {
         RecruitmentProcessVersion recruitmentProcessVersion = recruitmentProcessVersionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new NotFoundException(
                         "RecruitmentProcessVersion " + id + " not found"
                 ));
 
         if (recruitmentProcessVersion.isActive()) {
-            throw new IllegalArgumentException(
+            throw new InvalidEntityStateException(
                     "RecruitmentProcessVersion " + id + " is already active"
             );
         }

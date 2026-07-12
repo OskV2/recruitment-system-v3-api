@@ -1,5 +1,8 @@
 package com.szponty.recruitment_system.recruitment_system.recruitmentprocess.service;
 
+import com.szponty.recruitment_system.common.exception.InvalidEntityStateException;
+import com.szponty.recruitment_system.common.exception.LastActiveVersionException;
+import com.szponty.recruitment_system.common.exception.NotFoundException;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.CreateRecruitmentProcessVersionRequest;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.RecruitmentProcessVersionResponse;
 import com.szponty.recruitment_system.recruitmentprocess.mapper.RecruitmentProcessVersionMapper;
@@ -55,6 +58,22 @@ public class RecruitmentProcessVersionServiceTest {
     }
 
     @Test
+    void shouldThrowNotFoundWhenGettingNonExistentVersion() {
+        UUID id = UUID.fromString("00000000-0000-0000-0000-000000000003");
+
+        when(recruitmentProcessVersionRepository.findById(id))
+                .thenReturn(Optional.empty());
+
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> service.getRecruitmentProcessVersionById(id)
+        );
+
+        assertTrue(ex.getMessage().contains(id.toString()));
+
+        verify(mapper, never()).toResponse(any());
+    }
+
+    @Test
     void shouldReturnAllVersionsByRecruitmentProcessId() {
         UUID id = UUID.randomUUID();
 
@@ -86,6 +105,22 @@ public class RecruitmentProcessVersionServiceTest {
                 .findByRecruitmentProcess(process);
         verify(mapper).toResponse(v1);
         verify(mapper).toResponse(v2);
+    }
+
+    @Test
+    void shouldThrowNotFoundWhenGettingVersionsForNonExistentRecruitmentProcess() {
+        UUID id = UUID.fromString("00000000-0000-0000-0000-000000000003");
+
+        when(recruitmentProcessRepository.findById(id))
+                .thenReturn(Optional.empty());
+
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> service.getAllRecruitmentProcVersionsByRecruitmentProcessId(id)
+        );
+
+        assertTrue(ex.getMessage().contains(id.toString()));
+
+        verify(mapper, never()).toResponse(any());
     }
 
     @Test
@@ -129,6 +164,22 @@ public class RecruitmentProcessVersionServiceTest {
     }
 
     @Test
+    void shouldThrowNotFoundWhenCreatingVersionForNonExistentRecruitmentProcess() {
+        UUID id = UUID.fromString("00000000-0000-0000-0000-000000000003");
+
+        when(recruitmentProcessRepository.findById(id))
+                .thenReturn(Optional.empty());
+
+        NotFoundException ex = assertThrows(NotFoundException.class,
+                () -> service.getAllRecruitmentProcVersionsByRecruitmentProcessId(id)
+        );
+
+        assertTrue(ex.getMessage().contains(id.toString()));
+
+        verify(mapper, never()).toResponse(any());
+    }
+
+    @Test
     void shouldInactivateVersion() {
         UUID id = UUID.randomUUID();
         UUID processId = UUID.randomUUID();
@@ -154,6 +205,73 @@ public class RecruitmentProcessVersionServiceTest {
         assertFalse(entity.isActive());
     }
 
+    @Test
+    void shouldThrowNotFoundWhenInactivatingNonExistentVersion() {
+        UUID id = UUID.randomUUID();
+
+        when(recruitmentProcessVersionRepository.findById(id))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                NotFoundException.class,
+                () -> service.inactivateRecruitmentProcessVersion(id)
+        );
+    }
+
+
+    @Test
+    void shouldThrowLastActiveVersionExceptionWhenInactivatingLastActiveVersion() {
+        UUID id = UUID.randomUUID();
+
+        RecruitmentProcess process = RecruitmentProcess.builder()
+                .id(UUID.randomUUID())
+                .build();
+
+        RecruitmentProcessVersion version = RecruitmentProcessVersion.builder()
+                .id(id)
+                .recruitmentProcess(process)
+                .active(true)
+                .build();
+
+        when(recruitmentProcessVersionRepository.findById(id))
+                .thenReturn(Optional.of(version));
+
+        when(recruitmentProcessVersionRepository
+                .countByRecruitmentProcessIdAndActiveTrue(process.getId()))
+                .thenReturn(1L);
+
+        assertThrows(
+                LastActiveVersionException.class,
+                () -> service.inactivateRecruitmentProcessVersion(id)
+        );
+    }
+
+    @Test
+    void shouldThrowInvalidEntityStateExceptionWhenInactivatingInactiveVersion() {
+        UUID id = UUID.randomUUID();
+
+        RecruitmentProcess process = RecruitmentProcess.builder()
+                .id(UUID.randomUUID())
+                .build();
+
+        RecruitmentProcessVersion version = RecruitmentProcessVersion.builder()
+                .id(id)
+                .recruitmentProcess(process)
+                .active(false)
+                .build();
+
+        when(recruitmentProcessVersionRepository.findById(id))
+                .thenReturn(Optional.of(version));
+
+        when(recruitmentProcessVersionRepository
+                .countByRecruitmentProcessIdAndActiveTrue(process.getId()))
+                .thenReturn(2L);
+
+        assertThrows(
+                InvalidEntityStateException.class,
+                () -> service.inactivateRecruitmentProcessVersion(id)
+        );
+    }
 
     @Test
     void shouldActivateVersion() {
@@ -169,5 +287,36 @@ public class RecruitmentProcessVersionServiceTest {
         service.activateRecruitmentProcessVersion(id);
 
         assertTrue(entity.isActive());
+    }
+
+    @Test
+    void shouldThrowNotFoundWhenActivatingNonExistentVersion() {
+        UUID id = UUID.randomUUID();
+
+        when(recruitmentProcessVersionRepository.findById(id))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                NotFoundException.class,
+                () -> service.activateRecruitmentProcessVersion(id)
+        );
+    }
+
+    @Test
+    void shouldThrowInvalidEntityStateExceptionWhenActivatingAlreadyActiveVersion() {
+        UUID id = UUID.randomUUID();
+
+        RecruitmentProcessVersion version = RecruitmentProcessVersion.builder()
+                .id(id)
+                .active(true)
+                .build();
+
+        when(recruitmentProcessVersionRepository.findById(id))
+                .thenReturn(Optional.of(version));
+
+        assertThrows(
+                InvalidEntityStateException.class,
+                () -> service.activateRecruitmentProcessVersion(id)
+        );
     }
 }

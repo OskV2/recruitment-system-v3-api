@@ -1,6 +1,6 @@
 package com.szponty.recruitment_system.recruitmentprocess.service;
 
-import com.szponty.recruitment_system.common.exception.InvalidProcessStepStateException;
+import com.szponty.recruitment_system.common.exception.InvalidEntityStateException;
 import com.szponty.recruitment_system.common.exception.NotFoundException;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.CreateProcessStepRequest;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.ProcessStepResponse;
@@ -98,7 +98,7 @@ public class ProcessStepService {
                         "ProcessStep " + id + " not found"));
 
         if (processStep.isDeleted()) {
-            throw new InvalidProcessStepStateException(
+            throw new InvalidEntityStateException(
                     "ProcessStep " + id + " already deleted"
             );
         }
@@ -113,7 +113,7 @@ public class ProcessStepService {
                         "ProcessStep " + id + " not found"));
 
         if (!processStep.isDeleted()) {
-            throw new InvalidProcessStepStateException(
+            throw new InvalidEntityStateException(
                     "ProcessStep " + id + " is not deleted"
             );
         }

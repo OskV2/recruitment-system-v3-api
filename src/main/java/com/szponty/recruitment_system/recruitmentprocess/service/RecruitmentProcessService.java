@@ -1,13 +1,15 @@
 package com.szponty.recruitment_system.recruitmentprocess.service;
 
+import com.szponty.recruitment_system.common.exception.InvalidEntityStateException;
+import com.szponty.recruitment_system.common.exception.NotFoundException;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.CreateRecruitmentProcessRequest;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.RecruitmentProcessResponse;
 import com.szponty.recruitment_system.recruitmentprocess.mapper.RecruitmentProcessMapper;
 import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcess;
 import com.szponty.recruitment_system.recruitmentprocess.repository.RecruitmentProcessRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,6 +20,7 @@ public class RecruitmentProcessService {
     private final RecruitmentProcessRepository recruitmentProcessRepository;
     private final RecruitmentProcessMapper processMapper;
 
+    @Transactional(readOnly = true)
     public List<RecruitmentProcessResponse> getAllRecruitmentProcesses() {
         return recruitmentProcessRepository.findAll()
                 .stream()
@@ -25,15 +28,17 @@ public class RecruitmentProcessService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public RecruitmentProcessResponse getRecruitmentProcessById(UUID id) {
         RecruitmentProcess recruitmentProcess = recruitmentProcessRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new NotFoundException(
                     "RecruitmentProcess " + id + " not found"
                 ));
 
         return processMapper.toResponse(recruitmentProcess);
     }
 
+    @Transactional
     public RecruitmentProcessResponse createRecruitmentProcess(CreateRecruitmentProcessRequest request) {
         RecruitmentProcess recruitmentProcess = recruitmentProcessRepository.save(processMapper.toEntity(request));
         return processMapper.toResponse(recruitmentProcess);
@@ -42,12 +47,12 @@ public class RecruitmentProcessService {
     @Transactional
     public void deleteRecruitmentProcess(UUID id) {
         RecruitmentProcess recruitmentProcess = recruitmentProcessRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new NotFoundException(
                         "RecruitmentProcess " + id + " not found"
                 ));
 
         if (recruitmentProcess.isDeleted()) {
-            throw new IllegalArgumentException(
+            throw new InvalidEntityStateException(
                     "RecruitmentProcess " + id + " already deleted"
             );
         }
@@ -58,12 +63,12 @@ public class RecruitmentProcessService {
     @Transactional
     public void restoreRecruitmentProcess(UUID id) {
         RecruitmentProcess recruitmentProcess = recruitmentProcessRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
+                .orElseThrow(() -> new NotFoundException(
                         "RecruitmentProcess " + id + " not found"
                 ));
 
         if (!recruitmentProcess.isDeleted()) {
-            throw new IllegalArgumentException(
+            throw new InvalidEntityStateException(
                     "RecruitmentProcess " + id + " is not deleted"
             );
         }

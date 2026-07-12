@@ -1,6 +1,6 @@
 package com.szponty.recruitment_system.recruitment_system.recruitmentprocess.service;
 
-import com.szponty.recruitment_system.common.exception.InvalidProcessStepStateException;
+import com.szponty.recruitment_system.common.exception.InvalidEntityStateException;
 import com.szponty.recruitment_system.common.exception.NotFoundException;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.CreateProcessStepRequest;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.ProcessStepResponse;
@@ -269,7 +269,7 @@ public class ProcessStepServiceTest {
                 .thenReturn(Optional.of(step));
 
         assertThrows(
-                InvalidProcessStepStateException.class,
+                InvalidEntityStateException.class,
                 () -> service.deleteProcessStep(id)
         );
 
@@ -324,7 +324,7 @@ public class ProcessStepServiceTest {
                 .thenReturn(Optional.of(step));
 
         assertThrows(
-                InvalidProcessStepStateException.class,
+                InvalidEntityStateException.class,
                 () -> service.restoreProcessStep(id)
         );
 
