@@ -154,6 +154,7 @@ public class RecruitmentProcessVersionServiceTest {
         assertFalse(entity.isActive());
     }
 
+
     @Test
     void shouldActivateVersion() {
         UUID id = UUID.randomUUID();
