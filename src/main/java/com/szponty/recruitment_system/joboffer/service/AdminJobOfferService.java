@@ -1,7 +1,6 @@
 package com.szponty.recruitment_system.joboffer.service;
 
 import com.szponty.recruitment_system.dictionary.model.*;
-import com.szponty.recruitment_system.dictionary.repository.BenefitRepository;
 import com.szponty.recruitment_system.joboffer.dto.AdminJobOfferDetailsResponse;
 import com.szponty.recruitment_system.joboffer.dto.AdminJobOfferShortResponse;
 import com.szponty.recruitment_system.joboffer.dto.ChangeJobOfferStatusRequest;
@@ -9,9 +8,9 @@ import com.szponty.recruitment_system.joboffer.dto.CreateJobOfferRequest;
 import com.szponty.recruitment_system.joboffer.mapper.JobOfferMapper;
 import com.szponty.recruitment_system.joboffer.model.JobOffer;
 import com.szponty.recruitment_system.joboffer.model.JobOfferBenefit;
-import com.szponty.recruitment_system.joboffer.model.JobOfferBenefitId;
 import com.szponty.recruitment_system.joboffer.model.JobOfferStatus;
 import com.szponty.recruitment_system.joboffer.repository.JobOfferRepository;
+import com.szponty.recruitment_system.joboffer.resolver.JobOfferBenefitResolver;
 import com.szponty.recruitment_system.joboffer.resolver.JobOfferReferenceResolver;
 import com.szponty.recruitment_system.recruitmentProcess.model.RecruitmentProcessVersion;
 import com.szponty.recruitment_system.user.model.User;
@@ -23,7 +22,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +30,7 @@ public class AdminJobOfferService {
     private final JobOfferRepository jobOfferRepository;
     private final JobOfferMapper jobOfferMapper;
     private final JobOfferReferenceResolver referenceResolver;
-    private final BenefitRepository benefitRepository;
+    private final JobOfferBenefitResolver benefitResolver;
 
     @Transactional(readOnly = true)
     public List<AdminJobOfferShortResponse> getAll() {
@@ -60,8 +58,7 @@ public class AdminJobOfferService {
         FullTimeEquivalent fte = referenceResolver.resolveFullTimeEquivalent(request.fullTimeEquivalentId());
         WorkModel workModel = referenceResolver.resolveWorkModel(request.workModelId());
         Department department = referenceResolver.resolveDepartment(request.departmentId());
-        RecruitmentProcessVersion recruitmentProcessVersion =
-                referenceResolver.resolveRecruitmentProcessVersion(request.recruitmentProcessVersionId());
+        RecruitmentProcessVersion recruitmentProcessVersion = referenceResolver.resolveRecruitmentProcessVersion(request.recruitmentProcessVersionId());
         User recruiter = referenceResolver.resolveUser(request.recruiterId());
         User substituteRecruiter = referenceResolver.resolveUser(request.substituteRecruiterId());
 
@@ -86,7 +83,7 @@ public class AdminJobOfferService {
 
         JobOffer savedJobOffer = jobOfferRepository.save(jobOffer);
 
-        Set<JobOfferBenefit> benefits = createBenefits(savedJobOffer, request.benefits());
+        Set<JobOfferBenefit> benefits = benefitResolver.createBenefits(savedJobOffer, request.benefits());
         savedJobOffer.setBenefits(benefits);
 
         return jobOfferMapper.toAdminDetailsResponse(savedJobOffer);
@@ -157,7 +154,7 @@ public class AdminJobOfferService {
         );
 
         if (request.benefits() != null) {
-            updateBenefits(jobOffer, request.benefits());
+            benefitResolver.updateBenefits(jobOffer, request.benefits());
         }
 
         return jobOfferMapper.toAdminDetailsResponse(jobOffer);
@@ -212,55 +209,5 @@ public class AdminJobOfferService {
         ) {
             throw new IllegalArgumentException("Job offer is not ready to publish");
         }
-    }
-
-    private Set<JobOfferBenefit> createBenefits(JobOffer jobOffer, Set<UUID> benefitIds) {
-        if (benefitIds == null || benefitIds.isEmpty()) {
-            return Set.of();
-        }
-
-        return benefitIds.stream()
-                .map(benefitId -> {
-                    Benefit benefit = benefitRepository.findById(benefitId)
-                            .orElseThrow(() -> new IllegalArgumentException("Benefit not found"));
-
-                    return JobOfferBenefit.builder()
-                            .jobOffer(jobOffer)
-                            .benefit(benefit)
-                            .build();
-                })
-                .collect(Collectors.toSet());
-    }
-
-    private void updateBenefits(JobOffer jobOffer, Set<UUID> requestedBenefitIds) {
-        jobOffer.getBenefits().removeIf(jobOfferBenefit ->
-                !requestedBenefitIds.contains(jobOfferBenefit.getBenefit().getId())
-        );
-
-        Set<UUID> currentBenefitIds = jobOffer.getBenefits()
-                .stream()
-                .map(jobOfferBenefit -> jobOfferBenefit.getBenefit().getId())
-                .collect(Collectors.toSet());
-
-        Set<UUID> benefitIdsToAdd = requestedBenefitIds
-                .stream()
-                .filter(benefitId -> !currentBenefitIds.contains(benefitId))
-                .collect(Collectors.toSet());
-
-        List<Benefit> benefitsToAdd = benefitRepository.findAllById(benefitIdsToAdd);
-
-        if (benefitsToAdd.size() != benefitIdsToAdd.size()) {
-            throw new IllegalArgumentException("One or more benefits were not found");
-        }
-
-        benefitsToAdd.forEach(benefit -> {
-            JobOfferBenefit jobOfferBenefit = JobOfferBenefit.builder()
-                    .id(new JobOfferBenefitId(jobOffer.getId(), benefit.getId()))
-                    .jobOffer(jobOffer)
-                    .benefit(benefit)
-                    .build();
-
-            jobOffer.getBenefits().add(jobOfferBenefit);
-        });
     }
 }

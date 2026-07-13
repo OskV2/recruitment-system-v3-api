@@ -1,5 +1,6 @@
 package com.szponty.recruitment_system.joboffer.repository;
 
+import com.szponty.recruitment_system.common.repository.FindOrThrowRepository;
 import com.szponty.recruitment_system.joboffer.model.JobOffer;
 import com.szponty.recruitment_system.joboffer.model.JobOfferStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface JobOfferRepository extends JpaRepository<JobOffer, UUID> {
+public interface JobOfferRepository extends FindOrThrowRepository<JobOffer, UUID> {
     List<JobOffer> findAllByStatusActive();
 
     @Query("""
