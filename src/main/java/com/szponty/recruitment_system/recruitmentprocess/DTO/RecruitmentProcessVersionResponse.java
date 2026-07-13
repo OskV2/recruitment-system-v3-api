@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public record RecruitmentProcessVersionResponse(
         UUID id,
-        UUID version,
+        Integer version,
         boolean active,
         LocalDateTime createdAt
 ) {

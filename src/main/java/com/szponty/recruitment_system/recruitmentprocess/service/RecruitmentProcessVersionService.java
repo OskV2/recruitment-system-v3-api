@@ -22,7 +22,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class RecruitmentProcessVersionService {
-    private final ProcessStepRepository processStepRepository;
     private final RecruitmentProcessRepository recruitmentProcessRepository;
     private final RecruitmentProcessVersionRepository recruitmentProcessVersionRepository;
 
@@ -53,8 +52,7 @@ public class RecruitmentProcessVersionService {
 
     @Transactional
     public RecruitmentProcessVersionResponse createRecruitmentProcessVersion(
-        UUID recruitmentProcessId,
-        CreateRecruitmentProcessVersionRequest request
+        UUID recruitmentProcessId
     ) {
         RecruitmentProcess recruitmentProcess = recruitmentProcessRepository.findById(recruitmentProcessId)
                 .orElseThrow(() -> new NotFoundException(
@@ -63,14 +61,8 @@ public class RecruitmentProcessVersionService {
 
         RecruitmentProcessVersion version = RecruitmentProcessVersion.builder()
                 .recruitmentProcess(recruitmentProcess)
-                .version(UUID.randomUUID())
+                .version(getNextVersionNumber(recruitmentProcessId))
                 .build();
-
-        List<UUID> stepsToFind = request.stepIds();
-
-        List<ProcessStep> stepList = processStepRepository.findAllById(stepsToFind);
-
-        version.setSteps(stepList);
 
         RecruitmentProcessVersion savedVersion =
                 recruitmentProcessVersionRepository.save(version);
@@ -120,5 +112,12 @@ public class RecruitmentProcessVersionService {
         }
 
         recruitmentProcessVersion.setActive(true);
+    }
+
+    private Integer getNextVersionNumber(UUID recruitmentProcessId) {
+
+        return recruitmentProcessVersionRepository
+                .findMaxVersionByRecruitmentProcessId(recruitmentProcessId)
+                .orElse(0) + 1;
     }
 }

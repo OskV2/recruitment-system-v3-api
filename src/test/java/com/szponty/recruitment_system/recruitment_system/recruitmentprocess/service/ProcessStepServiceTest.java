@@ -4,15 +4,20 @@ import com.szponty.recruitment_system.common.exception.InvalidEntityStateExcepti
 import com.szponty.recruitment_system.common.exception.NotFoundException;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.CreateProcessStepRequest;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.ProcessStepResponse;
+import com.szponty.recruitment_system.recruitmentprocess.DTO.RecruitmentProcessVersionResponse;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.UpdateProcessStepRequest;
 import com.szponty.recruitment_system.recruitmentprocess.mapper.ProcessStepMapper;
+import com.szponty.recruitment_system.recruitmentprocess.mapper.RecruitmentProcessVersionMapper;
 import com.szponty.recruitment_system.recruitmentprocess.model.ProcessStep;
+import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcess;
 import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcessVersion;
 import com.szponty.recruitment_system.recruitmentprocess.repository.ProcessStepRepository;
+import com.szponty.recruitment_system.recruitmentprocess.repository.RecruitmentProcessRepository;
 import com.szponty.recruitment_system.recruitmentprocess.repository.RecruitmentProcessVersionRepository;
 import com.szponty.recruitment_system.recruitmentprocess.service.ProcessStepService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,10 +35,17 @@ public class ProcessStepServiceTest {
 
     @Mock
     ProcessStepRepository processStepRepository;
+
+    @Mock
+    RecruitmentProcessRepository recruitmentProcessRepository;
+
     @Mock
     RecruitmentProcessVersionRepository recruitmentProcessVersionRepository;
     @Mock
     ProcessStepMapper processStepMapper;
+
+    @Mock
+    RecruitmentProcessVersionMapper mapper;
 
     @InjectMocks
     ProcessStepService service;
@@ -122,50 +134,51 @@ public class ProcessStepServiceTest {
     }
 
     @Test
-    void shouldCreateProcessStep() {
-        UUID versionId = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    void shouldCreateVersion() {
+        UUID processId = UUID.randomUUID();
 
-        CreateProcessStepRequest request = new CreateProcessStepRequest(
-                versionId,
-                "Interview with future manager",
-                "",
-                true,
-                true
-        );
+        RecruitmentProcess process = RecruitmentProcess.builder()
+                .id(processId)
+                .build();
 
-        RecruitmentProcessVersion version = mock(RecruitmentProcessVersion.class);
-        ProcessStep step = ProcessStep.builder().build();
+        RecruitmentProcessVersionResponse response =
+                mock(RecruitmentProcessVersionResponse.class);
 
-        ProcessStepResponse response = new ProcessStepResponse(
-                UUID.fromString("00000000-0000-0000-0000-000000000002"),
-                versionId,
-                "Interview with future manager",
-                "",
-                true,
-                true,
-                LocalDateTime.of(2025, 1, 1, 12, 0)
-        );
 
-        when(recruitmentProcessVersionRepository.findById(versionId))
-                .thenReturn(Optional.of(version));
+        when(recruitmentProcessRepository.findById(processId))
+                .thenReturn(Optional.of(process));
 
-        when(processStepMapper.toEntity(request, version))
-                .thenReturn(step);
+        when(recruitmentProcessVersionRepository
+                .findMaxVersionByRecruitmentProcessId(processId))
+                .thenReturn(Optional.of(2));
 
-        when(processStepRepository.save(step))
-                .thenReturn(step);
+        when(recruitmentProcessVersionRepository.save(any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
-        when(processStepMapper.toResponse(step))
+        when(mapper.toResponse(any()))
                 .thenReturn(response);
 
-        ProcessStepResponse result = service.createProcessStep(request);
 
-        assertEquals(response, result);
+        RecruitmentProcessVersionResponse result =
+                service.createRecruitmentProcessVersion(processId);
 
-        verify(recruitmentProcessVersionRepository).findById(versionId);
-        verify(processStepMapper).toEntity(request, version);
-        verify(processStepRepository).save(step);
-        verify(processStepMapper).toResponse(step);
+
+        assertSame(response, result);
+
+
+        ArgumentCaptor<RecruitmentProcessVersion> captor =
+                ArgumentCaptor.forClass(RecruitmentProcessVersion.class);
+
+        verify(recruitmentProcessVersionRepository)
+                .save(captor.capture());
+
+
+        RecruitmentProcessVersion saved =
+                captor.getValue();
+
+
+        assertSame(process, saved.getRecruitmentProcess());
+        assertEquals(3, saved.getVersion());
     }
 
     @Test
@@ -173,7 +186,7 @@ public class ProcessStepServiceTest {
         UUID versionId = UUID.randomUUID();
 
         CreateProcessStepRequest request = new CreateProcessStepRequest(
-                versionId, "Step", "", false, false);
+                "Step", "", false, false);
 
         when(recruitmentProcessVersionRepository.findById(versionId))
                 .thenReturn(Optional.empty());

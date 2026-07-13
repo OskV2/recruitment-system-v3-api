@@ -6,9 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
 public record CreateProcessStepRequest(
-        @NotNull
-        UUID recruitmentProcessVersion,
-
         @NotBlank
         String name,
         String description,

@@ -23,10 +23,6 @@ public class ProcessStep {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "process_version_id", nullable = false)
-    private RecruitmentProcessVersion processVersion;
-
     @NotBlank
     @Size(max = 50)
     @Column(nullable = false, length = 50)

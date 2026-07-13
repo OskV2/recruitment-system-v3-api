@@ -191,9 +191,12 @@ CREATE TABLE recruitment_process_version
 (
     id                     UUID PRIMARY KEY   DEFAULT gen_random_uuid(),
     recruitment_process_id UUID      NOT NULL,
-    version                UUID               DEFAULT gen_random_uuid(),
+    version                INT       NOT NULL,
     active                 BOOLEAN   NOT NULL DEFAULT FALSE,
     created_at             TIMESTAMP NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_recruitment_process_version_number
+        UNIQUE(recruitment_process_id, version),
 
     CONSTRAINT fk_recruitment_process_version_process
         FOREIGN KEY (recruitment_process_id)
@@ -290,8 +293,7 @@ CREATE TABLE job_offer_benefit
 CREATE TABLE process_step
 (
     id                           UUID PRIMARY KEY     DEFAULT gen_random_uuid(),
-    process_version_id           UUID        NOT NULL,
-    step_order                   INT         NOT NULL,
+
     name                         VARCHAR(50) NOT NULL,
     description                  VARCHAR(255),
 
@@ -301,13 +303,34 @@ CREATE TABLE process_step
     deleted                      BOOLEAN     NOT NULL DEFAULT FALSE,
     created_at                   TIMESTAMP   NOT NULL DEFAULT NOW(),
     updated_at                   TIMESTAMP   NOT NULL DEFAULT NOW(),
+);
 
-    CONSTRAINT fk_process_step_recruitment_process_version
-        FOREIGN KEY (process_version_id)
-            REFERENCES recruitment_process_version (id),
+CREATE TABLE process_version_step
+(
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
-    CONSTRAINT uq_process_step_order
-        UNIQUE (process_version_id, step_order)
+    recruitment_process_version_id UUID NOT NULL,
+    process_step_id UUID NOT NULL,
+
+    step_order INT NOT NULL,
+
+    created_at             TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMP    NOT NULL DEFAULT NOW()
+
+        CONSTRAINT fk_process_version_step_version
+        FOREIGN KEY (recruitment_process_version_id)
+            REFERENCES recruitment_process_version(id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_process_version_step_step
+        FOREIGN KEY (process_step_id)
+            REFERENCES process_step(id),
+
+    CONSTRAINT uq_process_version_step
+        UNIQUE (recruitment_process_version_id, process_step_id),
+
+    CONSTRAINT uq_process_version_step_order
+        UNIQUE (recruitment_process_version_id, step_order)
 );
 
 CREATE TABLE job_application

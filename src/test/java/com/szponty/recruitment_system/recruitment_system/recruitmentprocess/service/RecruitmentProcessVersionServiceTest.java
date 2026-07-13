@@ -30,7 +30,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class RecruitmentProcessVersionServiceTest {
 
-    @Mock ProcessStepRepository processStepRepository;
     @Mock RecruitmentProcessRepository recruitmentProcessRepository;
     @Mock RecruitmentProcessVersionRepository recruitmentProcessVersionRepository;
     @Mock RecruitmentProcessVersionMapper mapper;
@@ -126,41 +125,49 @@ public class RecruitmentProcessVersionServiceTest {
     @Test
     void shouldCreateVersion() {
         UUID processId = UUID.randomUUID();
-        UUID stepId = UUID.randomUUID();
 
         RecruitmentProcess process = RecruitmentProcess.builder()
                 .id(processId)
                 .build();
 
-        ProcessStep step = ProcessStep.builder().id(stepId).build();
-
-        CreateRecruitmentProcessVersionRequest request =
-                new CreateRecruitmentProcessVersionRequest(List.of(stepId));
-
         RecruitmentProcessVersionResponse response =
                 mock(RecruitmentProcessVersionResponse.class);
 
+
         when(recruitmentProcessRepository.findById(processId))
                 .thenReturn(Optional.of(process));
-        when(processStepRepository.findAllById(List.of(stepId)))
-                .thenReturn(List.of(step));
+
+        when(recruitmentProcessVersionRepository
+                .findMaxVersionByRecruitmentProcessId(processId))
+                .thenReturn(Optional.of(2));
+
         when(recruitmentProcessVersionRepository.save(any()))
-                .thenAnswer(inv -> inv.getArgument(0));
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
         when(mapper.toResponse(any()))
                 .thenReturn(response);
 
+
         RecruitmentProcessVersionResponse result =
-                service.createRecruitmentProcessVersion(processId, request);
+                service.createRecruitmentProcessVersion(processId);
+
 
         assertSame(response, result);
 
+
         ArgumentCaptor<RecruitmentProcessVersion> captor =
                 ArgumentCaptor.forClass(RecruitmentProcessVersion.class);
-        verify(recruitmentProcessVersionRepository).save(captor.capture());
 
-        RecruitmentProcessVersion saved = captor.getValue();
+        verify(recruitmentProcessVersionRepository)
+                .save(captor.capture());
+
+
+        RecruitmentProcessVersion saved =
+                captor.getValue();
+
+
         assertSame(process, saved.getRecruitmentProcess());
-        assertEquals(List.of(step), saved.getSteps());
+        assertEquals(3, saved.getVersion());
     }
 
     @Test

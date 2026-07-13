@@ -22,23 +22,26 @@ public class RecruitmentProcessVersion {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recruitment_process_id", nullable = false)
     private RecruitmentProcess recruitmentProcess;
 
-    private UUID version;
+    @Column(nullable = false)
+    private Integer version;
 
     @OneToMany(
-            mappedBy = "processVersion",
+            mappedBy = "recruitmentProcessVersion",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
     @Builder.Default
-    private List<ProcessStep> steps = new ArrayList<>();
+    private List<ProcessVersionStep> steps = new ArrayList<>();
 
     @ColumnDefault("false")
+    @Column(nullable = false)
     private boolean active;
 
     @CreationTimestamp
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 }

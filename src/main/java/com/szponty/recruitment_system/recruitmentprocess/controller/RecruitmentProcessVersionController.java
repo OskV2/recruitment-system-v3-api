@@ -25,13 +25,6 @@ public class RecruitmentProcessVersionController {
         return ResponseEntity.ok(recruitmentProcessVersionService.getRecruitmentProcessVersionById(id));
     }
 
-    // TODO: fix, move to recruitmentProcessController
-    @PostMapping("/{id}/steps")
-    public ResponseEntity<RecruitmentProcessVersionResponse> assignStepsToVersions(@PathVariable UUID id, CreateRecruitmentProcessVersionRequest processStepIds) {
-        RecruitmentProcessVersionResponse response = recruitmentProcessVersionService.createRecruitmentProcessVersion(id, processStepIds);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
     @PatchMapping("/{id}/activate")
     public ResponseEntity<Void> activateRecruitmentProcessVersion(@PathVariable UUID id) {
         recruitmentProcessVersionService.activateRecruitmentProcessVersion(id);

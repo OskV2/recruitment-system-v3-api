@@ -41,6 +41,18 @@ public class RecruitmentProcessController {
         return ResponseEntity.ok(recruitmentProcessVersionService.getAllRecruitmentProcVersionsByRecruitmentProcessId(id));
     }
 
+    @PostMapping("/{id}/versions")
+    public ResponseEntity<RecruitmentProcessVersionResponse> createRecruitmentProcessVersion(
+            @PathVariable UUID id
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(
+                        recruitmentProcessVersionService
+                                .createRecruitmentProcessVersion(id)
+                );
+    }
+
     @PostMapping
     public ResponseEntity<RecruitmentProcessResponse> createRecruitmentProcess(
             @Valid @RequestBody CreateRecruitmentProcessRequest request

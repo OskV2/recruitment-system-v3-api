@@ -22,8 +22,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProcessStepService {
     private final ProcessStepRepository processStepRepository;
-    private final RecruitmentProcessVersionRepository recruitmentProcessVersionRepository;
-
     private final ProcessStepMapper processStepMapper;
 
     @Transactional(readOnly = true)
@@ -45,22 +43,8 @@ public class ProcessStepService {
 
     @Transactional
     public ProcessStepResponse createProcessStep(@NonNull CreateProcessStepRequest request) {
-        RecruitmentProcessVersion recruitmentProcessVersion = recruitmentProcessVersionRepository
-                .findById(request.recruitmentProcessVersion())
-                .orElseThrow(() -> new NotFoundException(
-                        "RecruitmentProcessVersion " + request.recruitmentProcessVersion() + " not found"));
-
-        ProcessStep step = processStepRepository.save(processStepMapper.toEntity(request, recruitmentProcessVersion));
-
+        ProcessStep step = processStepRepository.save(processStepMapper.toEntity(request));
         return processStepMapper.toResponse(step);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ProcessStepResponse> getProcessStepsByRecruitmentProcessVersionId(UUID uuid) {
-        return processStepRepository.findByProcessVersionIdAndDeletedFalse(uuid)
-                .stream()
-                .map(processStepMapper::toResponse)
-                .toList();
     }
 
     @Transactional
