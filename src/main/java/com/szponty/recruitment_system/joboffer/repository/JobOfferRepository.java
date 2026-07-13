@@ -39,4 +39,8 @@ public interface JobOfferRepository extends JpaRepository<JobOffer, UUID> {
             @Param("status") JobOfferStatus status,
             @Param("now") LocalDateTime now
     );
+
+    List<JobOffer> findAllByDeletedFalse();
+
+    Optional<JobOffer> findByIdAndDeletedFalse(UUID id);
 }

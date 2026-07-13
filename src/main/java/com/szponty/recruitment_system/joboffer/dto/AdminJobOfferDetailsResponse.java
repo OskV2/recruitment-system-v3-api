@@ -25,8 +25,8 @@ public record AdminJobOfferDetailsResponse(
         WorkModel workModel,
         Department department,
         RecruitmentProcessVersion recruitmentProcessVersion,
-        User recruiter,
-        User substituteRecruiter,
+        User recruiterId,
+        User substituteRecruiterId,
         Set<JobOfferBenefit> benefits,
         JobOfferStatus offerStatus,
         int vacancy

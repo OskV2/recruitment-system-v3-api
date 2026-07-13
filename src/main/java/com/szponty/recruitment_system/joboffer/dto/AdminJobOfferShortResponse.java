@@ -13,7 +13,7 @@ public record AdminJobOfferShortResponse(
         String currency,
         LocalDateTime validFrom,
         LocalDateTime validTo,
-        User recruiter,
+        User recruiterId,
         JobOfferStatus offerStatus,
         int vacancy
 ) {
