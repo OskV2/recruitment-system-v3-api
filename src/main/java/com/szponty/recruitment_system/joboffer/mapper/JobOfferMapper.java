@@ -1,97 +1,45 @@
 package com.szponty.recruitment_system.joboffer.mapper;
 
+import com.szponty.recruitment_system.config.mapper.CentralMapperConfig;
+
 import com.szponty.recruitment_system.dictionary.model.*;
 import com.szponty.recruitment_system.joboffer.dto.*;
 import com.szponty.recruitment_system.joboffer.model.JobOffer;
 import com.szponty.recruitment_system.joboffer.model.JobOfferBenefit;
 import com.szponty.recruitment_system.joboffer.model.JobOfferStatus;
 import com.szponty.recruitment_system.recruitmentProcess.model.RecruitmentProcessVersion;
-import com.szponty.recruitment_system.user.dto.CreateUserRequest;
+
 import com.szponty.recruitment_system.user.model.User;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 
-@Component
-public class JobOfferMapper {
-    public AdminJobOfferDetailsResponse toAdminDetailsResponse(JobOffer jobOffer) {
-        return new AdminJobOfferDetailsResponse(
-                jobOffer.getName(),
-                jobOffer.getDescription(),
-                jobOffer.getSalaryFrom(),
-                jobOffer.getSalaryTo(),
-                jobOffer.getCurrency(),
-                jobOffer.getMustHaveRequirements(),
-                jobOffer.getNiceToHaveRequirements(),
-                jobOffer.getValidFrom(),
-                jobOffer.getValidTo(),
-                jobOffer.getContractType(),
-                jobOffer.getLocation(),
-                jobOffer.getFullTimeEquivalent(),
-                jobOffer.getWorkModel(),
-                jobOffer.getDepartment(),
-                jobOffer.getRecruitmentProcessVersion(),
-                jobOffer.getRecruiterId(),
-                jobOffer.getSubstituteRecruiterId(),
-                jobOffer.getBenefits(),
-                jobOffer.getOfferStatus(),
-                jobOffer.getVacancy()
-        );
-    }
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-    public AdminJobOfferShortResponse toAdminShortResponse(JobOffer jobOffer) {
-        return new AdminJobOfferShortResponse(
-                jobOffer.getName(),
-                jobOffer.getDescription(),
-                jobOffer.getSalaryFrom(),
-                jobOffer.getSalaryTo(),
-                jobOffer.getCurrency(),
-                jobOffer.getValidFrom(),
-                jobOffer.getValidTo(),
-                jobOffer.getRecruiterId(),
-                jobOffer.getOfferStatus(),
-                jobOffer.getVacancy()
-        );
-    }
+@Mapper(config = CentralMapperConfig.class)
+public abstract class JobOfferMapper {
+    @Mapping(target = "contractType", source = "contractType.name")
+    @Mapping(target = "location", source = "location.city")
+    @Mapping(target = "workModel", source = "workModel.name")
+    @Mapping(target = "department", source = "department.name")
+    public abstract AdminJobOfferShortResponse toAdminShortResponse(JobOffer jobOffer);
 
-    public PublicJobOfferDetailsResponse toPublicDetailsResponse(JobOffer jobOffer) {
-        return new PublicJobOfferDetailsResponse(
-                jobOffer.getName(),
-                jobOffer.getDescription(),
-                jobOffer.getSalaryFrom(),
-                jobOffer.getSalaryTo(),
-                jobOffer.getCurrency(),
-                jobOffer.getMustHaveRequirements(),
-                jobOffer.getNiceToHaveRequirements(),
-                jobOffer.getValidFrom(),
-                jobOffer.getValidTo(),
-                jobOffer.getContractType(),
-                jobOffer.getLocation(),
-                jobOffer.getFullTimeEquivalent(),
-                jobOffer.getWorkModel(),
-                jobOffer.getDepartment(),
-                jobOffer.getRecruitmentProcessVersion(),
-                jobOffer.getBenefits(),
-                jobOffer.getVacancy()
-        );
-    }
+    @Mapping(target = "contractType", source = "contractType.name")
+    @Mapping(target = "location", source = "location.city")
+    @Mapping(target = "workModel", source = "workModel.name")
+    @Mapping(target = "department", source = "department.name")
+    public abstract AdminJobOfferDetailsResponse toAdminDetailsResponse(JobOffer jobOffer);
 
-    public PublicJobOfferShortResponse toPublicShortResponse(JobOffer jobOffer) {
-        return new PublicJobOfferShortResponse(
-                jobOffer.getName(),
-                jobOffer.getSalaryFrom(),
-                jobOffer.getSalaryTo(),
-                jobOffer.getCurrency(),
-                jobOffer.getValidTo(),
-                jobOffer.getContractType(),
-                jobOffer.getLocation(),
-                jobOffer.getFullTimeEquivalent(),
-                jobOffer.getWorkModel(),
-                jobOffer.getDepartment(),
-                jobOffer.getVacancy()
-        );
-    }
+    @Mapping(target = "contractType", source = "contractType.name")
+    @Mapping(target = "location", source = "location.city")
+    @Mapping(target = "workModel", source = "workModel.name")
+    public abstract PublicJobOfferShortResponse toPublicShortResponse(JobOffer jobOffer);
+
+    @Mapping(target = "contractType", source = "contractType.name")
+    @Mapping(target = "location", source = "location.city")
+    @Mapping(target = "workModel", source = "workModel.name")
+    public abstract PublicJobOfferDetailsResponse toPublicDetailsResponse(JobOffer jobOffer);
 
     public JobOffer toCreateEntity(CreateJobOfferRequest request,
                                    LocalDateTime validFrom,
@@ -106,7 +54,7 @@ public class JobOfferMapper {
                                    User substituteRecruiter,
                                    Set<JobOfferBenefit> benefits,
                                    JobOfferStatus status
-                                   ) {
+    ) {
         return JobOffer.builder()
                 .name(request.name())
                 .description(request.description())

@@ -43,7 +43,7 @@ public class AdminJobOfferService {
 
     @Transactional(readOnly = true)
     public List<AdminJobOfferShortResponse> getAll() {
-        return jobOfferRepository.findAllByDeletedFalse()
+        return jobOfferRepository.findAll()
                 .stream()
                 .map(jobOfferMapper::toAdminShortResponse)
                 .toList();
@@ -193,16 +193,8 @@ public class AdminJobOfferService {
     }
 
     private JobOffer getJobOfferOrThrow(UUID id) {
-        return jobOfferRepository.findByIdAndDeletedFalse(id)
+        return jobOfferRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Job offer not found"));
-    }
-
-    private JobOfferStatus resolveStatus(String status) {
-        if (status == null) {
-            return JobOfferStatus.DRAFT;
-        }
-
-        return JobOfferStatus.valueOf(status.toUpperCase());
     }
 
     private void validateCreateStatus(JobOfferStatus status) {
@@ -235,10 +227,6 @@ public class AdminJobOfferService {
         ) {
             throw new IllegalArgumentException("Job offer is not ready to publish");
         }
-    }
-
-    private LocalDateTime parseDateTime(String value) {
-        return value == null ? null : LocalDateTime.parse(value);
     }
 
     private ContractType findContractType(String id) {
