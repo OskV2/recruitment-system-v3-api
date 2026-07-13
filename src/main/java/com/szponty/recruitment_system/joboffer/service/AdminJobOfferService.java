@@ -1,7 +1,7 @@
 package com.szponty.recruitment_system.joboffer.service;
 
 import com.szponty.recruitment_system.dictionary.model.*;
-import com.szponty.recruitment_system.dictionary.repository.*;
+import com.szponty.recruitment_system.dictionary.repository.BenefitRepository;
 import com.szponty.recruitment_system.joboffer.dto.AdminJobOfferDetailsResponse;
 import com.szponty.recruitment_system.joboffer.dto.AdminJobOfferShortResponse;
 import com.szponty.recruitment_system.joboffer.dto.ChangeJobOfferStatusRequest;
@@ -12,9 +12,9 @@ import com.szponty.recruitment_system.joboffer.model.JobOfferBenefit;
 import com.szponty.recruitment_system.joboffer.model.JobOfferBenefitId;
 import com.szponty.recruitment_system.joboffer.model.JobOfferStatus;
 import com.szponty.recruitment_system.joboffer.repository.JobOfferRepository;
+import com.szponty.recruitment_system.joboffer.resolver.JobOfferReferenceResolver;
 import com.szponty.recruitment_system.recruitmentProcess.model.RecruitmentProcessVersion;
 import com.szponty.recruitment_system.user.model.User;
-import com.szponty.recruitment_system.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,14 +31,7 @@ public class AdminJobOfferService {
 
     private final JobOfferRepository jobOfferRepository;
     private final JobOfferMapper jobOfferMapper;
-
-    private final ContractTypeRepository contractTypeRepository;
-    private final LocationRepository locationRepository;
-    private final FullTimeEquivalentRepository fullTimeEquivalentRepository;
-    private final WorkModelRepository workModelRepository;
-    private final DepartmentRepository departmentRepository;
-    private final RecruitmentProcessVersionRepository recruitmentProcessVersionRepository;
-    private final UserRepository userRepository;
+    private final JobOfferReferenceResolver referenceResolver;
     private final BenefitRepository benefitRepository;
 
     @Transactional(readOnly = true)
@@ -62,15 +55,15 @@ public class AdminJobOfferService {
 
         validateCreateStatus(status);
 
-        ContractType contractType = findContractType(request.contractTypeId());
-        Location location = findLocation(request.locationId());
-        FullTimeEquivalent fte = findFte(request.fullTimeEquivalentId());
-        WorkModel workModel = findWorkModel(request.workModelId());
-        Department department = findDepartment(request.departmentId());
+        ContractType contractType = referenceResolver.resolveContractType(request.contractTypeId());
+        Location location = referenceResolver.resolveLocation(request.locationId());
+        FullTimeEquivalent fte = referenceResolver.resolveFullTimeEquivalent(request.fullTimeEquivalentId());
+        WorkModel workModel = referenceResolver.resolveWorkModel(request.workModelId());
+        Department department = referenceResolver.resolveDepartment(request.departmentId());
         RecruitmentProcessVersion recruitmentProcessVersion =
-                findRecruitmentProcessVersion(request.recruitmentProcessVersionId());
-        User recruiter = findUser(request.recruiterId());
-        User substituteRecruiter = findUser(request.substituteRecruiterId());
+                referenceResolver.resolveRecruitmentProcessVersion(request.recruitmentProcessVersionId());
+        User recruiter = referenceResolver.resolveUser(request.recruiterId());
+        User substituteRecruiter = referenceResolver.resolveUser(request.substituteRecruiterId());
 
         LocalDateTime validFrom = request.validFrom();
         LocalDateTime validTo = request.validTo();
@@ -108,48 +101,41 @@ public class AdminJobOfferService {
         }
 
         ContractType contractType = request.contractTypeId() != null
-                ? findContractType(request.contractTypeId())
+                ? referenceResolver.resolveContractType(request.contractTypeId())
                 : null;
 
         Location location = request.locationId() != null
-                ? findLocation(request.locationId())
+                ? referenceResolver.resolveLocation(request.locationId())
                 : null;
 
         FullTimeEquivalent fte = request.fullTimeEquivalentId() != null
-                ? findFte(request.fullTimeEquivalentId())
+                ? referenceResolver.resolveFullTimeEquivalent(request.fullTimeEquivalentId())
                 : null;
 
         WorkModel workModel = request.workModelId() != null
-                ? findWorkModel(request.workModelId())
+                ? referenceResolver.resolveWorkModel(request.workModelId())
                 : null;
 
         Department department = request.departmentId() != null
-                ? findDepartment(request.departmentId())
+                ? referenceResolver.resolveDepartment(request.departmentId())
                 : null;
 
         RecruitmentProcessVersion recruitmentProcessVersion = request.recruitmentProcessVersionId() != null
-                ? findRecruitmentProcessVersion(request.recruitmentProcessVersionId())
+                ? referenceResolver.resolveRecruitmentProcessVersion(request.recruitmentProcessVersionId())
                 : null;
 
         User recruiter = request.recruiterId() != null
-                ? findUser(request.recruiterId())
+                ? referenceResolver.resolveUser(request.recruiterId())
                 : null;
 
         User substituteRecruiter = request.substituteRecruiterId() != null
-                ? findUser(request.substituteRecruiterId())
+                ? referenceResolver.resolveUser(request.substituteRecruiterId())
                 : null;
 
-        LocalDateTime validFrom = request.validFrom() != null
-                ? request.validFrom()
-                : null;
+        LocalDateTime validFrom = request.validFrom();
+        LocalDateTime validTo = request.validTo();
 
-        LocalDateTime validTo = request.validTo() != null
-                ? request.validTo()
-                : null;
-
-        JobOfferStatus status = request.offerStatus() != null
-                ? request.offerStatus()
-                : null;
+        JobOfferStatus status = request.offerStatus();
 
         if (status != null) {
             validateCreateStatus(status);
@@ -193,8 +179,7 @@ public class AdminJobOfferService {
     }
 
     private JobOffer getJobOfferOrThrow(UUID id) {
-        return jobOfferRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Job offer not found"));
+        return jobOfferRepository.getOrThrow(id, "Job offer");
     }
 
     private void validateCreateStatus(JobOfferStatus status) {
@@ -227,41 +212,6 @@ public class AdminJobOfferService {
         ) {
             throw new IllegalArgumentException("Job offer is not ready to publish");
         }
-    }
-
-    private ContractType findContractType(String id) {
-        return contractTypeRepository.findById(UUID.fromString(id))
-                .orElseThrow(() -> new IllegalArgumentException("Contract type not found"));
-    }
-
-    private Location findLocation(String id) {
-        return locationRepository.findById(UUID.fromString(id))
-                .orElseThrow(() -> new IllegalArgumentException("Location not found"));
-    }
-
-    private FullTimeEquivalent findFte(String id) {
-        return fullTimeEquivalentRepository.findById(UUID.fromString(id))
-                .orElseThrow(() -> new IllegalArgumentException("Full time equivalent not found"));
-    }
-
-    private WorkModel findWorkModel(String id) {
-        return workModelRepository.findById(UUID.fromString(id))
-                .orElseThrow(() -> new IllegalArgumentException("Work model not found"));
-    }
-
-    private Department findDepartment(String id) {
-        return departmentRepository.findById(UUID.fromString(id))
-                .orElseThrow(() -> new IllegalArgumentException("Department not found"));
-    }
-
-    private RecruitmentProcessVersion findRecruitmentProcessVersion(String id) {
-        return recruitmentProcessVersionRepository.findById(UUID.fromString(id))
-                .orElseThrow(() -> new IllegalArgumentException("Recruitment process version not found"));
-    }
-
-    private User findUser(String id) {
-        return userRepository.findById(UUID.fromString(id))
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
     private Set<JobOfferBenefit> createBenefits(JobOffer jobOffer, Set<UUID> benefitIds) {
