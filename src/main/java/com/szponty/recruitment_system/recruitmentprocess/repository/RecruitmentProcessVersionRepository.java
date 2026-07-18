@@ -14,6 +14,18 @@ public interface RecruitmentProcessVersionRepository extends JpaRepository<Recru
     long countByRecruitmentProcessIdAndActiveTrue(UUID recruitmentProcessId);
 
     @Query("""
+        select distinct v from RecruitmentProcessVersion v
+        join fetch v.recruitmentProcess rp
+        left join fetch v.steps pvs
+        left join fetch pvs.processStep ps
+        where v.active = true
+        and rp.deleted = false
+        order by rp.name
+        """)
+    List<RecruitmentProcessVersion> findAllActiveWithSteps();
+
+
+    @Query("""
         SELECT MAX(rpv.version)
         FROM RecruitmentProcessVersion rpv
         WHERE rpv.recruitmentProcess.id = :processId

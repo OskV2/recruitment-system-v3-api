@@ -143,36 +143,66 @@ VALUES ('60000000-0000-0000-0000-000000000001',
         'Standard IT Recruitment',
         'Default recruitment process');
 
-INSERT INTO recruitment_process_version(id,
-                                        recruitment_process_id,
-                                        version,
-                                        active)
-VALUES ('70000000-0000-0000-0000-000000000001',
-        '60000000-0000-0000-0000-000000000001',
-        '70000000-0000-0000-0000-000000000999',
-        TRUE);
+INSERT INTO recruitment_process_version(
+    id,
+    recruitment_process_id,
+    version,
+    active
+)
+VALUES (
+           '70000000-0000-0000-0000-000000000001',
+           '60000000-0000-0000-0000-000000000001',
+           1,
+           TRUE
+       );
 
-INSERT INTO process_step(id,
-                         process_version_id,
-                         step_order,
-                         name,
-                         requires_interview)
-VALUES ('80000000-0000-0000-0000-000000000001',
-        '70000000-0000-0000-0000-000000000001',
-        1,
+INSERT INTO process_step(
+    id,
+    name,
+    requires_interview,
+    requires_department_approval
+)
+VALUES
+    (
+        '80000000-0000-0000-0000-000000000001',
         'CV Review',
-        FALSE),
-       ('80000000-0000-0000-0000-000000000002',
-        '70000000-0000-0000-0000-000000000001',
-        2,
+        FALSE,
+        FALSE
+    ),
+    (
+        '80000000-0000-0000-0000-000000000002',
         'HR Interview',
-        TRUE),
-       ('80000000-0000-0000-0000-000000000003',
-        '70000000-0000-0000-0000-000000000001',
-        3,
+        TRUE,
+        FALSE
+    ),
+    (
+        '80000000-0000-0000-0000-000000000003',
         'Technical Interview',
-        TRUE);
+        TRUE,
+        TRUE
+    );
 
+INSERT INTO process_version_step(
+    recruitment_process_version_id,
+    process_step_id,
+    step_order
+)
+VALUES
+    (
+        '70000000-0000-0000-0000-000000000001',
+        '80000000-0000-0000-0000-000000000001',
+        1
+    ),
+    (
+        '70000000-0000-0000-0000-000000000001',
+        '80000000-0000-0000-0000-000000000002',
+        2
+    ),
+    (
+        '70000000-0000-0000-0000-000000000001',
+        '80000000-0000-0000-0000-000000000003',
+        3
+    );
 
 INSERT INTO job_offer(id,
                       name,

@@ -301,7 +301,7 @@ CREATE TABLE process_step
 
     deleted                      BOOLEAN     NOT NULL DEFAULT FALSE,
     created_at                   TIMESTAMP   NOT NULL DEFAULT NOW(),
-    updated_at                   TIMESTAMP   NOT NULL DEFAULT NOW(),
+    updated_at                   TIMESTAMP   NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE process_version_step
@@ -314,9 +314,9 @@ CREATE TABLE process_version_step
     step_order INT NOT NULL,
 
     created_at             TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMP    NOT NULL DEFAULT NOW()
+    updated_at  TIMESTAMP    NOT NULL DEFAULT NOW(),
 
-        CONSTRAINT fk_process_version_step_version
+    CONSTRAINT fk_process_version_step_version
         FOREIGN KEY (recruitment_process_version_id)
             REFERENCES recruitment_process_version(id)
             ON DELETE CASCADE,

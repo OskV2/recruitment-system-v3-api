@@ -32,6 +32,12 @@ public class ProcessVersionStepService {
     @Transactional(readOnly = true)
     public List<ProcessVersionStepResponse> getStepsByVersion(UUID versionId) {
 
+        if (!recruitmentProcessVersionRepository.existsById(versionId)) {
+            throw new NotFoundException(
+                    "RecruitmentProcessVersion " + versionId + " not found"
+            );
+        }
+
         return processVersionStepRepository
                 .findByRecruitmentProcessVersionIdOrderByStepOrderAsc(versionId)
                 .stream()
@@ -88,16 +94,36 @@ public class ProcessVersionStepService {
         );
     }
 
-
     @Transactional
-    public void removeStepFromVersion(UUID id) {
+    public ProcessVersionStepResponse updateStepOrder(
+            UUID processVersionStepId,
+            Integer newOrder
+    ) {
 
         ProcessVersionStep step =
-                processVersionStepRepository.findById(id)
+                processVersionStepRepository.findById(processVersionStepId)
                         .orElseThrow(() ->
                                 new NotFoundException(
                                         "ProcessVersionStep "
-                                                + id
+                                                + processVersionStepId
+                                                + " not found"
+                                )
+                        );
+
+        step.setStepOrder(newOrder);
+
+        return processVersionStepMapper.toResponse(step);
+    }
+
+    @Transactional
+    public void removeStepFromVersion(UUID processVersionStepId) {
+
+        ProcessVersionStep step =
+                processVersionStepRepository.findById(processVersionStepId)
+                        .orElseThrow(() ->
+                                new NotFoundException(
+                                        "ProcessVersionStep "
+                                                + processVersionStepId
                                                 + " not found"
                                 )
                         );

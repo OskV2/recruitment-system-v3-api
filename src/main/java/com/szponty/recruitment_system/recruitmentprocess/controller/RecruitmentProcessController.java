@@ -29,37 +29,18 @@ public class RecruitmentProcessController {
         return ResponseEntity.ok(recruitmentProcessService.getAllRecruitmentProcesses());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<RecruitmentProcessResponse> getRecruitmentProcessById(@PathVariable UUID id) {
-        return ResponseEntity.ok(recruitmentProcessService.getRecruitmentProcessById(id));
-    }
-
-    @GetMapping("/{id}/versions")
-    public ResponseEntity<List<RecruitmentProcessVersionResponse>> getAllRecruitmentProcessVersionsByRecruitmentProcessId(
-            @PathVariable UUID id
-    ) {
-        return ResponseEntity.ok(recruitmentProcessVersionService.getAllRecruitmentProcVersionsByRecruitmentProcessId(id));
-    }
-
-    @PostMapping("/{id}/versions")
-    public ResponseEntity<RecruitmentProcessVersionResponse> createRecruitmentProcessVersion(
-            @PathVariable UUID id
-    ) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(
-                        recruitmentProcessVersionService
-                                .createRecruitmentProcessVersion(id)
-                );
-    }
-
-    @PostMapping
-    public ResponseEntity<RecruitmentProcessResponse> createRecruitmentProcess(
-            @Valid @RequestBody CreateRecruitmentProcessRequest request
-    ) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(recruitmentProcessService.createRecruitmentProcess(request));
-    }
+//    @GetMapping("/{id}")
+//    public ResponseEntity<RecruitmentProcessResponse> getRecruitmentProcessById(@PathVariable UUID id) {
+//        return ResponseEntity.ok(recruitmentProcessService.getRecruitmentProcessById(id));
+//    }
+//
+//    @PostMapping
+//    public ResponseEntity<RecruitmentProcessResponse> createRecruitmentProcess(
+//            @Valid @RequestBody CreateRecruitmentProcessRequest request
+//    ) {
+//        return ResponseEntity.status(HttpStatus.CREATED)
+//                .body(recruitmentProcessService.createRecruitmentProcess(request));
+//    }
 
     @PatchMapping("/{id}/restore")
     public ResponseEntity<Void> restoreRecruitmentProcess(@PathVariable UUID id) {
