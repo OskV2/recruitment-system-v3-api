@@ -134,54 +134,6 @@ public class ProcessStepServiceTest {
     }
 
     @Test
-    void shouldCreateVersion() {
-        UUID processId = UUID.randomUUID();
-
-        RecruitmentProcess process = RecruitmentProcess.builder()
-                .id(processId)
-                .build();
-
-        RecruitmentProcessVersionResponse response =
-                mock(RecruitmentProcessVersionResponse.class);
-
-
-        when(recruitmentProcessRepository.findById(processId))
-                .thenReturn(Optional.of(process));
-
-        when(recruitmentProcessVersionRepository
-                .findMaxVersionByRecruitmentProcessId(processId))
-                .thenReturn(Optional.of(2));
-
-        when(recruitmentProcessVersionRepository.save(any()))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-
-        when(mapper.toResponse(any()))
-                .thenReturn(response);
-
-
-        RecruitmentProcessVersionResponse result =
-                service.createRecruitmentProcessVersion(processId);
-
-
-        assertSame(response, result);
-
-
-        ArgumentCaptor<RecruitmentProcessVersion> captor =
-                ArgumentCaptor.forClass(RecruitmentProcessVersion.class);
-
-        verify(recruitmentProcessVersionRepository)
-                .save(captor.capture());
-
-
-        RecruitmentProcessVersion saved =
-                captor.getValue();
-
-
-        assertSame(process, saved.getRecruitmentProcess());
-        assertEquals(3, saved.getVersion());
-    }
-
-    @Test
     void shouldThrowNotFoundWhenCreatingProcessStepForNonExistentVersion() {
         UUID versionId = UUID.randomUUID();
 

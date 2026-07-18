@@ -2,7 +2,7 @@ package com.szponty.recruitment_system.joboffer.dto;
 
 import com.szponty.recruitment_system.dictionary.model.*;
 import com.szponty.recruitment_system.joboffer.model.JobOfferBenefit;
-import com.szponty.recruitment_system.recruitmentProcess.model.RecruitmentProcessVersion;
+import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcessVersion;
 
 import java.time.LocalDateTime;
 import java.util.Set;

@@ -12,7 +12,7 @@ import com.szponty.recruitment_system.joboffer.model.JobOfferStatus;
 import com.szponty.recruitment_system.joboffer.repository.JobOfferRepository;
 import com.szponty.recruitment_system.joboffer.resolver.JobOfferBenefitResolver;
 import com.szponty.recruitment_system.joboffer.resolver.JobOfferReferenceResolver;
-import com.szponty.recruitment_system.recruitmentProcess.model.RecruitmentProcessVersion;
+import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcessVersion;
 import com.szponty.recruitment_system.user.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

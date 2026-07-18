@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface JobOfferRepository extends FindOrThrowRepository<JobOffer, UUID> {
-    List<JobOffer> findAllByStatusActive();
+    List<JobOffer> findAllByOfferStatus(JobOfferStatus offerStatus);
 
     @Query("""
         SELECT jobOffer
