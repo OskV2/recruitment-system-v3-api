@@ -38,6 +38,17 @@ public interface RecruitmentProcessMapper {
     @Mapping(target = "createdAt", source = "processStep.createdAt")
     ProcessStepResponse toStepResponse(ProcessVersionStep pvs);
 
+    @Mapping(target = "id", source = "recruitmentProcess.id")
+    @Mapping(target = "name", source = "recruitmentProcess.name")
+    @Mapping(target = "description", source = "recruitmentProcess.description")
+    @Mapping(target = "deleted", source = "recruitmentProcess.deleted")
+    @Mapping(target = "createdAt", source = "recruitmentProcess.createdAt")
+    @Mapping(target = "updatedAt", source = "recruitmentProcess.updatedAt")
+    @Mapping(target = "version", source = "version")
+    @Mapping(target = "active", source = "active")
+    @Mapping(target = "steps", ignore = true)
+    RecruitmentProcessResponse toResponseWithoutSteps(RecruitmentProcessVersion version);
+
     @org.mapstruct.Named("mapSortedSteps")
     default List<ProcessStepResponse> mapSortedSteps(List<ProcessVersionStep> steps) {
         return steps.stream()

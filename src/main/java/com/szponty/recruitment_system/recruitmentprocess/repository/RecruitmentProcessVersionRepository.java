@@ -34,4 +34,10 @@ public interface RecruitmentProcessVersionRepository extends FindOrThrowReposito
     Optional<Integer> findMaxVersionByRecruitmentProcessId(
             UUID processId
     );
+
+    List<RecruitmentProcessVersion> findAllByRecruitmentProcessIdOrderByVersionDesc(UUID processId);
+
+    Optional<RecruitmentProcessVersion> findByRecruitmentProcessIdAndActiveTrue(UUID processId);
+
+    Optional<RecruitmentProcessVersion> findByRecruitmentProcessIdAndVersion(UUID processId, int version);
 }

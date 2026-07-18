@@ -23,31 +23,42 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RecruitmentProcessVersionService {
     private final RecruitmentProcessRepository recruitmentProcessRepository;
-    private final RecruitmentProcessVersionRepository recruitmentProcessVersionRepository;
+    private final RecruitmentProcessVersionRepository versionRepository;
 
     private final RecruitmentProcessVersionMapper recruitmentProcessVersionMapper;
 
     @Transactional(readOnly = true)
-    public RecruitmentProcessVersionResponse getRecruitmentProcessVersionById(UUID id) {
-        RecruitmentProcessVersion recruitmentProcessVersion = recruitmentProcessVersionRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        "RecruitmentProcessVersion with id" + id + " was not found."
-                ));
-
-        return recruitmentProcessVersionMapper.toResponse(recruitmentProcessVersion);
+    public List<RecruitmentProcessVersion> getAllVersions(UUID processId) {
+        return versionRepository.findAllByRecruitmentProcessIdOrderByVersionDesc(processId);
     }
 
     @Transactional(readOnly = true)
-    public List<RecruitmentProcessVersionResponse> getAllRecruitmentProcVersionsByRecruitmentProcessId(UUID id) {
-        RecruitmentProcess recruitmentProcess = recruitmentProcessRepository.findById(id)
+    public RecruitmentProcessVersion getActiveVersion(UUID processId) {
+        return versionRepository.findByRecruitmentProcessIdAndActiveTrue(processId)
                 .orElseThrow(() -> new NotFoundException(
-                        "RecruitmentProcess with id " + id + " was not found."
+                        "No active version found for RecruitmentProcess " + processId
                 ));
+    }
 
-        return recruitmentProcessVersionRepository.findByRecruitmentProcess(recruitmentProcess)
-                        .stream()
-                        .map(recruitmentProcessVersionMapper::toResponse)
-                        .toList();
+    @Transactional(readOnly = true)
+    public RecruitmentProcessVersion getVersionById(UUID processId, UUID versionId) {
+        RecruitmentProcessVersion v = versionRepository.findById(versionId)
+                .orElseThrow(() -> new NotFoundException("Version " + versionId + " not found"));
+
+        if (!v.getRecruitmentProcess().getId().equals(processId)) {
+            throw new NotFoundException(
+                    "Version " + versionId + " does not belong to RecruitmentProcess " + processId
+            );
+        }
+        return v;
+    }
+
+    @Transactional(readOnly = true)
+    public RecruitmentProcessVersion getVersionByNumber(UUID processId, int versionNumber) {
+        return versionRepository.findByRecruitmentProcessIdAndVersion(processId, versionNumber)
+                .orElseThrow(() -> new NotFoundException(
+                        "Version " + versionNumber + " not found for RecruitmentProcess " + processId
+                ));
     }
 
     @Transactional
@@ -65,7 +76,7 @@ public class RecruitmentProcessVersionService {
                 .build();
 
         RecruitmentProcessVersion savedVersion =
-                recruitmentProcessVersionRepository.save(version);
+                versionRepository.save(version);
 
         return recruitmentProcessVersionMapper.toResponse(savedVersion);
     }
@@ -73,13 +84,13 @@ public class RecruitmentProcessVersionService {
 
     @Transactional
     public void inactivateRecruitmentProcessVersion(UUID id) {
-        RecruitmentProcessVersion recruitmentProcessVersion = recruitmentProcessVersionRepository.findById(id)
+        RecruitmentProcessVersion recruitmentProcessVersion = versionRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         "RecruitmentProcessVersion " + id + " not found"
                 ));
 
         long activeVersions =
-                recruitmentProcessVersionRepository.countByRecruitmentProcessIdAndActiveTrue(
+                versionRepository.countByRecruitmentProcessIdAndActiveTrue(
                         recruitmentProcessVersion.getRecruitmentProcess().getId()
                 );
 
@@ -100,7 +111,7 @@ public class RecruitmentProcessVersionService {
 
     @Transactional
     public void activateRecruitmentProcessVersion(UUID id) {
-        RecruitmentProcessVersion recruitmentProcessVersion = recruitmentProcessVersionRepository.findById(id)
+        RecruitmentProcessVersion recruitmentProcessVersion = versionRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         "RecruitmentProcessVersion " + id + " not found"
                 ));
@@ -116,7 +127,7 @@ public class RecruitmentProcessVersionService {
 
     private Integer getNextVersionNumber(UUID recruitmentProcessId) {
 
-        return recruitmentProcessVersionRepository
+        return versionRepository
                 .findMaxVersionByRecruitmentProcessId(recruitmentProcessId)
                 .orElse(0) + 1;
     }

@@ -6,6 +6,7 @@ import com.szponty.recruitment_system.recruitmentprocess.DTO.CreateRecruitmentPr
 import com.szponty.recruitment_system.recruitmentprocess.DTO.RecruitmentProcessResponse;
 import com.szponty.recruitment_system.recruitmentprocess.mapper.RecruitmentProcessMapper;
 import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcess;
+import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcessVersion;
 import com.szponty.recruitment_system.recruitmentprocess.repository.RecruitmentProcessRepository;
 import com.szponty.recruitment_system.recruitmentprocess.repository.RecruitmentProcessVersionRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,8 @@ public class RecruitmentProcessService {
     private final RecruitmentProcessVersionRepository recruitmentProcessVersionRepository;
     private final RecruitmentProcessMapper processMapper;
 
+    private final RecruitmentProcessVersionService recruitmentProcessVersionService;
+
     @Transactional(readOnly = true)
     public List<RecruitmentProcessResponse> getAllRecruitmentProcesses() {
         return recruitmentProcessVersionRepository.findAllActiveWithSteps()
@@ -29,6 +32,40 @@ public class RecruitmentProcessService {
                 .map(processMapper::toResponse)
                 .toList();
     }
+
+    @Transactional(readOnly = true)
+    public List<RecruitmentProcessResponse> getRecruitmentProcessById(UUID id, String version, boolean includeSteps) {
+        RecruitmentProcess process = recruitmentProcessRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("RecruitmentProcess " + id + " not found"));
+
+        List<RecruitmentProcessVersion> versions = resolveVersions(id, version);
+
+        return versions.stream()
+                .map(v -> includeSteps ? processMapper.toResponse(v) : processMapper.toResponseWithoutSteps(v))
+                .toList();
+    }
+
+    private List<RecruitmentProcessVersion> resolveVersions(UUID processId, String version) {
+        if ("all".equalsIgnoreCase(version)) {
+            return recruitmentProcessVersionService.getAllVersions(processId);
+        }
+        if ("latest".equalsIgnoreCase(version)) {
+            return List.of(recruitmentProcessVersionService.getActiveVersion(processId));
+        }
+        int versionNumber = parseVersionNumber(version);
+        return List.of(recruitmentProcessVersionService.getVersionByNumber(processId, versionNumber));
+    }
+
+    private int parseVersionNumber(String version) {
+        try {
+            return Integer.parseInt(version);
+        } catch (NumberFormatException e) {
+            throw new InvalidEntityStateException(
+                    "Invalid version parameter: '" + version + "'. Expected 'all', 'latest' or a version number."
+            );
+        }
+    }
+
 
 //    @Transactional(readOnly = true)
 //    public RecruitmentProcessResponse getRecruitmentProcessById(UUID id) {

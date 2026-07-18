@@ -29,10 +29,17 @@ public class RecruitmentProcessController {
         return ResponseEntity.ok(recruitmentProcessService.getAllRecruitmentProcesses());
     }
 
-//    @GetMapping("/{id}")
-//    public ResponseEntity<RecruitmentProcessResponse> getRecruitmentProcessById(@PathVariable UUID id) {
-//        return ResponseEntity.ok(recruitmentProcessService.getRecruitmentProcessById(id));
-//    }
+    @GetMapping("/{id}")
+    public ResponseEntity<List<RecruitmentProcessResponse>> getRecruitmentProcessById(
+            @PathVariable UUID id,
+            @RequestParam(defaultValue = "true") boolean includeSteps,
+            @RequestParam(defaultValue = "latest") String version
+    ) {
+        return ResponseEntity.ok(
+                recruitmentProcessService.getRecruitmentProcessById(id, version, includeSteps)
+        );
+    }
+
 //
 //    @PostMapping
 //    public ResponseEntity<RecruitmentProcessResponse> createRecruitmentProcess(
