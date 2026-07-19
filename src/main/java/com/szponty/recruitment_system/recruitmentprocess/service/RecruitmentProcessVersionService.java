@@ -7,6 +7,7 @@ import com.szponty.recruitment_system.recruitmentprocess.DTO.CreateRecruitmentPr
 import com.szponty.recruitment_system.recruitmentprocess.DTO.RecruitmentProcessVersionResponse;
 import com.szponty.recruitment_system.recruitmentprocess.mapper.RecruitmentProcessVersionMapper;
 import com.szponty.recruitment_system.recruitmentprocess.model.ProcessStep;
+import com.szponty.recruitment_system.recruitmentprocess.model.ProcessVersionStep;
 import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcess;
 import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcessVersion;
 import com.szponty.recruitment_system.recruitmentprocess.repository.ProcessStepRepository;
@@ -16,14 +17,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class RecruitmentProcessVersionService {
     private final RecruitmentProcessRepository recruitmentProcessRepository;
     private final RecruitmentProcessVersionRepository versionRepository;
+    private final ProcessStepRepository processStepRepository;
 
     private final RecruitmentProcessVersionMapper recruitmentProcessVersionMapper;
 
@@ -62,23 +64,53 @@ public class RecruitmentProcessVersionService {
     }
 
     @Transactional
-    public RecruitmentProcessVersionResponse createRecruitmentProcessVersion(
-        UUID recruitmentProcessId
-    ) {
-        RecruitmentProcess recruitmentProcess = recruitmentProcessRepository.findById(recruitmentProcessId)
-                .orElseThrow(() -> new NotFoundException(
-                        "RecruitmentProcess with id " + recruitmentProcessId + " was not found."
-                ));
+    public RecruitmentProcessVersion createNewVersion(RecruitmentProcess process, List<UUID> processStepIds) {
+        List<ProcessStep> steps = resolveSteps(processStepIds);
 
-        RecruitmentProcessVersion version = RecruitmentProcessVersion.builder()
-                .recruitmentProcess(recruitmentProcess)
-                .version(getNextVersionNumber(recruitmentProcessId))
+        versionRepository.findByRecruitmentProcessIdAndActiveTrue(process.getId())
+                .ifPresent(current -> current.setActive(false));
+
+        int nextVersionNumber = versionRepository
+                .findTopByRecruitmentProcessIdOrderByVersionDesc(process.getId())
+                .map(v -> v.getVersion() + 1)
+                .orElse(1);
+
+        RecruitmentProcessVersion newVersion = RecruitmentProcessVersion.builder()
+                .recruitmentProcess(process)
+                .version(nextVersionNumber)
+                .active(true)
                 .build();
 
-        RecruitmentProcessVersion savedVersion =
-                versionRepository.save(version);
+        List<ProcessVersionStep> versionSteps = new ArrayList<>();
+        for (int i = 0; i < steps.size(); i++) {
+            versionSteps.add(ProcessVersionStep.builder()
+                    .recruitmentProcessVersion(newVersion)
+                    .processStep(steps.get(i))
+                    .stepOrder(i + 1)
+                    .build());
+        }
+        newVersion.setSteps(versionSteps);
 
-        return recruitmentProcessVersionMapper.toResponse(savedVersion);
+        return versionRepository.save(newVersion);
+    }
+
+    private List<ProcessStep> resolveSteps(List<UUID> processStepIds) {
+        if (processStepIds == null || processStepIds.isEmpty()) {
+            throw new InvalidEntityStateException("At least one process step is required");
+        }
+        if (processStepIds.size() != Set.copyOf(processStepIds).size()) {
+            throw new InvalidEntityStateException("Duplicate process step ids are not allowed");
+        }
+
+        List<ProcessStep> steps = processStepRepository.findAllById(processStepIds);
+        if (steps.size() != processStepIds.size()) {
+            Set<UUID> found = steps.stream().map(ProcessStep::getId).collect(Collectors.toSet());
+            List<UUID> missing = processStepIds.stream().filter(pid -> !found.contains(pid)).toList();
+            throw new NotFoundException("Process steps not found: " + missing);
+        }
+
+        Map<UUID, ProcessStep> byId = steps.stream().collect(Collectors.toMap(ProcessStep::getId, s -> s));
+        return processStepIds.stream().map(byId::get).toList();
     }
 
 
@@ -110,19 +142,24 @@ public class RecruitmentProcessVersionService {
     }
 
     @Transactional
-    public void activateRecruitmentProcessVersion(UUID id) {
-        RecruitmentProcessVersion recruitmentProcessVersion = versionRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        "RecruitmentProcessVersion " + id + " not found"
-                ));
+    public void activateVersion(UUID processId, UUID versionId) {
+        RecruitmentProcessVersion versionToActivate = versionRepository.findById(versionId)
+                .orElseThrow(() -> new NotFoundException("Version " + versionId + " not found"));
 
-        if (recruitmentProcessVersion.isActive()) {
-            throw new InvalidEntityStateException(
-                    "RecruitmentProcessVersion " + id + " is already active"
+        if (!versionToActivate.getRecruitmentProcess().getId().equals(processId)) {
+            throw new NotFoundException(
+                    "Version " + versionId + " does not belong to RecruitmentProcess " + processId
             );
         }
 
-        recruitmentProcessVersion.setActive(true);
+        if (versionToActivate.isActive()) {
+            throw new InvalidEntityStateException("Version " + versionId + " is already active");
+        }
+
+        versionRepository.findByRecruitmentProcessIdAndActiveTrue(processId)
+                .ifPresent(currentActive -> currentActive.setActive(false));
+
+        versionToActivate.setActive(true);
     }
 
     private Integer getNextVersionNumber(UUID recruitmentProcessId) {

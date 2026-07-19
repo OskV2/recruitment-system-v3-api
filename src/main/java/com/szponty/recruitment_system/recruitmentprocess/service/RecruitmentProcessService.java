@@ -4,6 +4,7 @@ import com.szponty.recruitment_system.common.exception.InvalidEntityStateExcepti
 import com.szponty.recruitment_system.common.exception.NotFoundException;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.CreateRecruitmentProcessRequest;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.RecruitmentProcessResponse;
+import com.szponty.recruitment_system.recruitmentprocess.DTO.UpdateRecruitmentProcessRequest;
 import com.szponty.recruitment_system.recruitmentprocess.mapper.RecruitmentProcessMapper;
 import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcess;
 import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcessVersion;
@@ -66,6 +67,23 @@ public class RecruitmentProcessService {
         }
     }
 
+public RecruitmentProcessResponse updateRecruitmentProcess(UUID id, UpdateRecruitmentProcessRequest request) {
+    RecruitmentProcess process = recruitmentProcessRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("RecruitmentProcess " + id + " not found"));
+
+    if (request.name() != null) {
+        process.setName(request.name());
+    }
+    if (request.description() != null) {
+        process.setDescription(request.description());
+    }
+
+    RecruitmentProcessVersion newVersion = recruitmentProcessVersionService.createNewVersion(
+            process, request.processSteps()
+    );
+
+    return processMapper.toResponse(newVersion);
+}
 
 //    @Transactional(readOnly = true)
 //    public RecruitmentProcessResponse getRecruitmentProcessById(UUID id) {
@@ -77,6 +95,14 @@ public class RecruitmentProcessService {
 //        RecruitmentProcess recruitmentProcess = recruitmentProcessRepository.save(processMapper.toEntity(request));
 //        return processMapper.toResponse(recruitmentProcess);
 //    }
+
+    @Transactional
+    public void activateVersion(UUID id, UUID versionId) {
+        recruitmentProcessRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("RecruitmentProcess " + id + " not found"));
+
+        recruitmentProcessVersionService.activateVersion(id, versionId);
+    }
 
     @Transactional
     public void deleteRecruitmentProcess(UUID id) {

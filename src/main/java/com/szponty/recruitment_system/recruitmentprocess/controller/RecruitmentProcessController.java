@@ -4,6 +4,7 @@ package com.szponty.recruitment_system.recruitmentprocess.controller;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.CreateRecruitmentProcessRequest;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.RecruitmentProcessResponse;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.RecruitmentProcessVersionResponse;
+import com.szponty.recruitment_system.recruitmentprocess.DTO.UpdateRecruitmentProcessRequest;
 import com.szponty.recruitment_system.recruitmentprocess.service.ProcessStepService;
 import com.szponty.recruitment_system.recruitmentprocess.service.RecruitmentProcessService;
 import com.szponty.recruitment_system.recruitmentprocess.service.RecruitmentProcessVersionService;
@@ -40,14 +41,27 @@ public class RecruitmentProcessController {
         );
     }
 
-//
-//    @PostMapping
+    @PatchMapping("/{id}")
+    public ResponseEntity<RecruitmentProcessResponse> updateRecruitmentProcess(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateRecruitmentProcessRequest request
+    ) {
+        return ResponseEntity.ok(recruitmentProcessService.updateRecruitmentProcess(id, request));
+    }
+
+//    @PostMapping()
 //    public ResponseEntity<RecruitmentProcessResponse> createRecruitmentProcess(
 //            @Valid @RequestBody CreateRecruitmentProcessRequest request
 //    ) {
 //        return ResponseEntity.status(HttpStatus.CREATED)
-//                .body(recruitmentProcessService.createRecruitmentProcess(request));
+//                .body(recruitmentProcessService.updateRecruitmentProcess(id, request));
 //    }
+
+    @PatchMapping("/{id}/activate/{versionId}")
+    public ResponseEntity<Void> activateVersion(@PathVariable UUID id, @PathVariable UUID versionId) {
+        recruitmentProcessService.activateVersion(id, versionId);
+        return  ResponseEntity.noContent().build();
+    }
 
     @PatchMapping("/{id}/restore")
     public ResponseEntity<Void> restoreRecruitmentProcess(@PathVariable UUID id) {
