@@ -38,19 +38,4 @@ public class GlobalExceptionHandler {
 
         return pd;
     }
-
-    @ExceptionHandler(LastActiveVersionException.class)
-    public ProblemDetail handleLastActiveVersion(
-            LastActiveVersionException ex
-    ) {
-        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.CONFLICT);
-
-        pd.setTitle("Cannot deactivate last active version");
-        pd.setDetail(ex.getMessage());
-        pd.setType(URI.create(
-                "https://api.toimplement.com/errors/cannot-deactivate-last-active-version"
-        ));
-
-        return pd;
-    }
 }
