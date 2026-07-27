@@ -15,16 +15,25 @@ public interface RecruitmentProcessVersionRepository extends FindOrThrowReposito
     long countByRecruitmentProcessIdAndActiveTrue(UUID recruitmentProcessId);
 
     @Query("""
-        select distinct v from RecruitmentProcessVersion v
-        join fetch v.recruitmentProcess rp
-        left join fetch v.steps pvs
-        left join fetch pvs.processStep ps
-        where v.active = true
-        and rp.deleted = false
-        order by rp.name
-        """)
-    List<RecruitmentProcessVersion> findAllActiveWithSteps();
+    select distinct v from RecruitmentProcessVersion v
+    join fetch v.recruitmentProcess rp
+    left join fetch v.steps pvs
+    left join fetch pvs.processStep ps
+    where rp.deleted = false
+    order by rp.name, v.version
+    """)
+    List<RecruitmentProcessVersion> findAllWithSteps();
 
+    @Query("""
+    select distinct v from RecruitmentProcessVersion v
+    join fetch v.recruitmentProcess rp
+    left join fetch v.steps pvs
+    left join fetch pvs.processStep ps
+    where v.active = :active
+    and rp.deleted = false
+    order by rp.name
+    """)
+    List<RecruitmentProcessVersion> findAllByActiveWithSteps(boolean active);
 
     @Query("""
         SELECT MAX(rpv.version)

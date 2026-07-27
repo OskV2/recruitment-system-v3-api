@@ -7,7 +7,6 @@ import java.util.UUID;
 
 public record CreateRecruitmentProcessRequest(
         @NotBlank String name,
-        String description,
-        List<UUID> processSteps
+        String description
 ) {
 }

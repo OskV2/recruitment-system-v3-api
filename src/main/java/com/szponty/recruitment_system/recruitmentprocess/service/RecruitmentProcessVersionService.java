@@ -142,18 +142,15 @@ public class RecruitmentProcessVersionService {
     }
 
     @Transactional
-    public void activateVersion(UUID processId, UUID versionId) {
-        RecruitmentProcessVersion versionToActivate = versionRepository.findById(versionId)
-                .orElseThrow(() -> new NotFoundException("Version " + versionId + " not found"));
-
-        if (!versionToActivate.getRecruitmentProcess().getId().equals(processId)) {
-            throw new NotFoundException(
-                    "Version " + versionId + " does not belong to RecruitmentProcess " + processId
-            );
-        }
+    public void activateVersion(UUID processId, Integer version) {
+        RecruitmentProcessVersion versionToActivate = versionRepository
+                .findByRecruitmentProcessIdAndVersion(processId, version)
+                .orElseThrow(() -> new NotFoundException(
+                        "Version " + version + " not found for RecruitmentProcess " + processId
+                ));
 
         if (versionToActivate.isActive()) {
-            throw new InvalidEntityStateException("Version " + versionId + " is already active");
+            throw new InvalidEntityStateException("Version " + version + " is already active");
         }
 
         versionRepository.findByRecruitmentProcessIdAndActiveTrue(processId)

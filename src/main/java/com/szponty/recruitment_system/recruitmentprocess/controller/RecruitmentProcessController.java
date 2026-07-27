@@ -23,10 +23,10 @@ import java.util.UUID;
 public class RecruitmentProcessController {
 
     private final RecruitmentProcessService recruitmentProcessService;
-    private final RecruitmentProcessVersionService recruitmentProcessVersionService;
 
     @GetMapping
-    public ResponseEntity<List<RecruitmentProcessResponse>> getAllRecruitmentProcesses() {
+    public ResponseEntity<List<RecruitmentProcessResponse>> getAllRecruitmentProcesses(
+    ) {
         return ResponseEntity.ok(recruitmentProcessService.getAllRecruitmentProcesses());
     }
 
@@ -49,17 +49,17 @@ public class RecruitmentProcessController {
         return ResponseEntity.ok(recruitmentProcessService.updateRecruitmentProcess(id, request));
     }
 
-//    @PostMapping()
-//    public ResponseEntity<RecruitmentProcessResponse> createRecruitmentProcess(
-//            @Valid @RequestBody CreateRecruitmentProcessRequest request
-//    ) {
-//        return ResponseEntity.status(HttpStatus.CREATED)
-//                .body(recruitmentProcessService.updateRecruitmentProcess(id, request));
-//    }
+    @PostMapping()
+    public ResponseEntity<RecruitmentProcessResponse> createRecruitmentProcess(
+            @Valid @RequestBody CreateRecruitmentProcessRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(recruitmentProcessService.createRecruitmentProcess(request));
+    }
 
-    @PatchMapping("/{id}/activate/{versionId}")
-    public ResponseEntity<Void> activateVersion(@PathVariable UUID id, @PathVariable UUID versionId) {
-        recruitmentProcessService.activateVersion(id, versionId);
+    @PatchMapping("/{id}/activate/{version}")
+    public ResponseEntity<Void> activateVersion(@PathVariable UUID id, @PathVariable Integer version) {
+        recruitmentProcessService.activateVersion(id, version);
         return  ResponseEntity.noContent().build();
     }
 

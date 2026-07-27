@@ -14,8 +14,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -28,9 +32,23 @@ public class RecruitmentProcessService {
 
     @Transactional(readOnly = true)
     public List<RecruitmentProcessResponse> getAllRecruitmentProcesses() {
-        return recruitmentProcessVersionRepository.findAllActiveWithSteps()
-                .stream()
-                .map(processMapper::toResponse)
+        List<RecruitmentProcess> processes = recruitmentProcessRepository.findByDeletedFalse();
+        List<RecruitmentProcessVersion> versions = recruitmentProcessVersionRepository.findAllWithSteps();
+
+        Map<UUID, List<RecruitmentProcessVersion>> versionsByProcessId = versions.stream()
+                .collect(Collectors.groupingBy(v -> v.getRecruitmentProcess().getId()));
+
+        return processes.stream()
+                .sorted(Comparator.comparing(RecruitmentProcess::getName))
+                .flatMap(process -> {
+                    List<RecruitmentProcessVersion> processVersions = versionsByProcessId.get(process.getId());
+                    if (processVersions == null || processVersions.isEmpty()) {
+                        return Stream.of(processMapper.toResponse(process));
+                    }
+                    return processVersions.stream()
+                            .sorted(Comparator.comparingInt(RecruitmentProcessVersion::getVersion))
+                            .map(processMapper::toResponse);
+                })
                 .toList();
     }
 
@@ -90,18 +108,18 @@ public RecruitmentProcessResponse updateRecruitmentProcess(UUID id, UpdateRecrui
 //        return new RecruitmentProcessResponse(
 //    }
 
-//    @Transactional
-//    public RecruitmentProcessResponse createRecruitmentProcess(CreateRecruitmentProcessRequest request) {
-//        RecruitmentProcess recruitmentProcess = recruitmentProcessRepository.save(processMapper.toEntity(request));
-//        return processMapper.toResponse(recruitmentProcess);
-//    }
+    @Transactional
+    public RecruitmentProcessResponse createRecruitmentProcess(CreateRecruitmentProcessRequest request) {
+        RecruitmentProcess recruitmentProcess = recruitmentProcessRepository.save(processMapper.toEntity(request));
+        return processMapper.toResponse(recruitmentProcess);
+    }
 
     @Transactional
-    public void activateVersion(UUID id, UUID versionId) {
+    public void activateVersion(UUID id, Integer version) {
         recruitmentProcessRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("RecruitmentProcess " + id + " not found"));
 
-        recruitmentProcessVersionService.activateVersion(id, versionId);
+        recruitmentProcessVersionService.activateVersion(id, version);
     }
 
     @Transactional
