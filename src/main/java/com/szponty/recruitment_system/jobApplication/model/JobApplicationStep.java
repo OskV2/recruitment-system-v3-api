@@ -1,6 +1,6 @@
 package com.szponty.recruitment_system.jobApplication.model;
 
-import com.szponty.recruitment_system.recruitmentProcess.model.ProcessStep;
+import com.szponty.recruitment_system.recruitmentprocess.model.ProcessStep;
 import com.szponty.recruitment_system.user.model.User;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;

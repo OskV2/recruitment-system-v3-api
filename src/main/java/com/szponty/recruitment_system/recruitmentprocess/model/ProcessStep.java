@@ -1,8 +1,9 @@
-package com.szponty.recruitment_system.recruitmentProcess.model;
+package com.szponty.recruitment_system.recruitmentprocess.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -17,28 +18,33 @@ import java.util.UUID;
 @Builder
 @Table(name = "process_step")
 public class ProcessStep {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "process_version_id")
-    private RecruitmentProcessVersion processVersion;
-
+    @NotBlank
+    @Size(max = 50)
+    @Column(nullable = false)
     private String name;
+
+    @Size(max = 255)
     private String description;
 
-    @ColumnDefault("false")
+    @Column(name = "requires_interview", nullable = false)
     private boolean requiresInterview;
-    @ColumnDefault("false")
+
+    @Column(name = "requires_department_approval", nullable = false)
     private boolean requiresDepartmentApproval;
 
-    @ColumnDefault("false")
+    @Column(nullable = false)
     private boolean deleted;
 
     @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 }

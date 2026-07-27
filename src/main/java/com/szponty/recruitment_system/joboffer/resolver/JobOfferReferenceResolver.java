@@ -3,8 +3,8 @@ package com.szponty.recruitment_system.joboffer.resolver;
 import com.szponty.recruitment_system.dictionary.model.*;
 import com.szponty.recruitment_system.dictionary.repository.*;
 
-import com.szponty.recruitment_system.recruitmentProcess.model.RecruitmentProcessVersion;
-import com.szponty.recruitment_system.recruitmentProcess.repository.RecruitmentProcessVersionRepository;
+import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcessVersion;
+import com.szponty.recruitment_system.recruitmentprocess.repository.RecruitmentProcessVersionRepository;
 
 import com.szponty.recruitment_system.user.model.User;
 import com.szponty.recruitment_system.user.repository.UserRepository;

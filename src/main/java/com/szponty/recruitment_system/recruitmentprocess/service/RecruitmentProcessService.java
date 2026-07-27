@@ -1,0 +1,151 @@
+package com.szponty.recruitment_system.recruitmentprocess.service;
+
+import com.szponty.recruitment_system.common.exception.InvalidEntityStateException;
+import com.szponty.recruitment_system.common.exception.NotFoundException;
+import com.szponty.recruitment_system.recruitmentprocess.DTO.CreateRecruitmentProcessRequest;
+import com.szponty.recruitment_system.recruitmentprocess.DTO.RecruitmentProcessResponse;
+import com.szponty.recruitment_system.recruitmentprocess.DTO.UpdateRecruitmentProcessRequest;
+import com.szponty.recruitment_system.recruitmentprocess.mapper.RecruitmentProcessMapper;
+import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcess;
+import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcessVersion;
+import com.szponty.recruitment_system.recruitmentprocess.repository.RecruitmentProcessRepository;
+import com.szponty.recruitment_system.recruitmentprocess.repository.RecruitmentProcessVersionRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+@Service
+@RequiredArgsConstructor
+public class RecruitmentProcessService {
+    private final RecruitmentProcessRepository recruitmentProcessRepository;
+    private final RecruitmentProcessVersionRepository recruitmentProcessVersionRepository;
+    private final RecruitmentProcessMapper processMapper;
+
+    private final RecruitmentProcessVersionService recruitmentProcessVersionService;
+
+    @Transactional(readOnly = true)
+    public List<RecruitmentProcessResponse> getAllRecruitmentProcesses() {
+        List<RecruitmentProcess> processes = recruitmentProcessRepository.findByDeletedFalse();
+        List<RecruitmentProcessVersion> versions = recruitmentProcessVersionRepository.findAllWithSteps();
+
+        Map<UUID, List<RecruitmentProcessVersion>> versionsByProcessId = versions.stream()
+                .collect(Collectors.groupingBy(v -> v.getRecruitmentProcess().getId()));
+
+        return processes.stream()
+                .sorted(Comparator.comparing(RecruitmentProcess::getName))
+                .flatMap(process -> {
+                    List<RecruitmentProcessVersion> processVersions = versionsByProcessId.get(process.getId());
+                    if (processVersions == null || processVersions.isEmpty()) {
+                        return Stream.of(processMapper.toResponse(process));
+                    }
+                    return processVersions.stream()
+                            .sorted(Comparator.comparingInt(RecruitmentProcessVersion::getVersion))
+                            .map(processMapper::toResponse);
+                })
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RecruitmentProcessResponse> getRecruitmentProcessById(UUID id, String version, boolean includeSteps) {
+        recruitmentProcessRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("RecruitmentProcess " + id + " not found"));
+
+        List<RecruitmentProcessVersion> versions = resolveVersions(id, version);
+
+        return versions.stream()
+                .map(v -> includeSteps ? processMapper.toResponse(v) : processMapper.toResponseWithoutSteps(v))
+                .toList();
+    }
+
+    private List<RecruitmentProcessVersion> resolveVersions(UUID processId, String version) {
+        if ("all".equalsIgnoreCase(version)) {
+            return recruitmentProcessVersionService.getAllVersions(processId);
+        }
+        if ("latest".equalsIgnoreCase(version)) {
+            return List.of(recruitmentProcessVersionService.getActiveVersion(processId));
+        }
+        int versionNumber = parseVersionNumber(version);
+        return List.of(recruitmentProcessVersionService.getVersionByNumber(processId, versionNumber));
+    }
+
+    private int parseVersionNumber(String version) {
+        try {
+            return Integer.parseInt(version);
+        } catch (NumberFormatException e) {
+            throw new InvalidEntityStateException(
+                    "Invalid version parameter: '" + version + "'. Expected 'all', 'latest' or a version number."
+            );
+        }
+    }
+
+public RecruitmentProcessResponse updateRecruitmentProcess(UUID id, UpdateRecruitmentProcessRequest request) {
+    RecruitmentProcess process = recruitmentProcessRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("RecruitmentProcess " + id + " not found"));
+
+    if (request.name() != null) {
+        process.setName(request.name());
+    }
+    if (request.description() != null) {
+        process.setDescription(request.description());
+    }
+
+    RecruitmentProcessVersion newVersion = recruitmentProcessVersionService.createNewVersion(
+            process, request.processSteps()
+    );
+
+    return processMapper.toResponse(newVersion);
+}
+
+    @Transactional
+    public RecruitmentProcessResponse createRecruitmentProcess(CreateRecruitmentProcessRequest request) {
+        RecruitmentProcess recruitmentProcess = recruitmentProcessRepository.save(processMapper.toEntity(request));
+        return processMapper.toResponse(recruitmentProcess);
+    }
+
+    @Transactional
+    public void activateVersion(UUID id, Integer version) {
+        recruitmentProcessRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("RecruitmentProcess " + id + " not found"));
+
+        recruitmentProcessVersionService.activateVersion(id, version);
+    }
+
+    @Transactional
+    public void deleteRecruitmentProcess(UUID id) {
+        RecruitmentProcess recruitmentProcess = recruitmentProcessRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(
+                        "RecruitmentProcess " + id + " not found"
+                ));
+
+        if (recruitmentProcess.isDeleted()) {
+            throw new InvalidEntityStateException(
+                    "RecruitmentProcess " + id + " already deleted"
+            );
+        }
+
+        recruitmentProcess.setDeleted(true);
+    }
+
+    @Transactional
+    public void restoreRecruitmentProcess(UUID id) {
+        RecruitmentProcess recruitmentProcess = recruitmentProcessRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(
+                        "RecruitmentProcess " + id + " not found"
+                ));
+
+        if (!recruitmentProcess.isDeleted()) {
+            throw new InvalidEntityStateException(
+                    "RecruitmentProcess " + id + " is not deleted"
+            );
+        }
+
+        recruitmentProcess.setDeleted(false);
+    }
+}

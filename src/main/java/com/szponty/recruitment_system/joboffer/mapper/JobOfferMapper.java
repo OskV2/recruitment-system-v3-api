@@ -7,7 +7,7 @@ import com.szponty.recruitment_system.joboffer.dto.*;
 import com.szponty.recruitment_system.joboffer.model.JobOffer;
 import com.szponty.recruitment_system.joboffer.model.JobOfferBenefit;
 import com.szponty.recruitment_system.joboffer.model.JobOfferStatus;
-import com.szponty.recruitment_system.recruitmentProcess.model.RecruitmentProcessVersion;
+import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcessVersion;
 
 import com.szponty.recruitment_system.user.model.User;
 
@@ -19,26 +19,15 @@ import org.mapstruct.Mapping;
 
 @Mapper(config = CentralMapperConfig.class)
 public abstract class JobOfferMapper {
-    @Mapping(target = "contractType", source = "contractType.name")
-    @Mapping(target = "location", source = "location.city")
-    @Mapping(target = "workModel", source = "workModel.name")
-    @Mapping(target = "department", source = "department.name")
+    @Mapping(target = "recruiter", source = "recruiterId")
     public abstract AdminJobOfferShortResponse toAdminShortResponse(JobOffer jobOffer);
 
-    @Mapping(target = "contractType", source = "contractType.name")
-    @Mapping(target = "location", source = "location.city")
-    @Mapping(target = "workModel", source = "workModel.name")
-    @Mapping(target = "department", source = "department.name")
+    @Mapping(target = "recruiter", source = "recruiterId")
+    @Mapping(target = "substituteRecruiter", source = "substituteRecruiterId")
     public abstract AdminJobOfferDetailsResponse toAdminDetailsResponse(JobOffer jobOffer);
 
-    @Mapping(target = "contractType", source = "contractType.name")
-    @Mapping(target = "location", source = "location.city")
-    @Mapping(target = "workModel", source = "workModel.name")
     public abstract PublicJobOfferShortResponse toPublicShortResponse(JobOffer jobOffer);
 
-    @Mapping(target = "contractType", source = "contractType.name")
-    @Mapping(target = "location", source = "location.city")
-    @Mapping(target = "workModel", source = "workModel.name")
     public abstract PublicJobOfferDetailsResponse toPublicDetailsResponse(JobOffer jobOffer);
 
     public JobOffer toCreateEntity(CreateJobOfferRequest request,

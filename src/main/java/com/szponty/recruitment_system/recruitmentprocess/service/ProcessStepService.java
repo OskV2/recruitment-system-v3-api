@@ -1,0 +1,105 @@
+package com.szponty.recruitment_system.recruitmentprocess.service;
+
+import com.szponty.recruitment_system.common.exception.InvalidEntityStateException;
+import com.szponty.recruitment_system.common.exception.NotFoundException;
+import com.szponty.recruitment_system.recruitmentprocess.DTO.CreateProcessStepRequest;
+import com.szponty.recruitment_system.recruitmentprocess.DTO.ProcessStepResponse;
+import com.szponty.recruitment_system.recruitmentprocess.DTO.UpdateProcessStepRequest;
+import com.szponty.recruitment_system.recruitmentprocess.mapper.ProcessStepMapper;
+import com.szponty.recruitment_system.recruitmentprocess.model.ProcessStep;
+import com.szponty.recruitment_system.recruitmentprocess.repository.ProcessStepRepository;
+import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class ProcessStepService {
+    private final ProcessStepRepository processStepRepository;
+    private final ProcessStepMapper processStepMapper;
+
+    @Transactional(readOnly = true)
+    public List<ProcessStepResponse> getAllSteps(boolean deleted) {
+        return processStepRepository.findByDeleted(deleted)
+                .stream()
+                .map(processStepMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public ProcessStepResponse getProcessStepById(UUID processStepId) {
+        ProcessStep processStep = processStepRepository.findById(processStepId)
+                .orElseThrow(() -> new NotFoundException(
+                        "ProcessStep " + processStepId + " not found"));
+
+        return processStepMapper.toResponse(processStep);
+    }
+
+    @Transactional
+    public ProcessStepResponse createProcessStep(@NonNull CreateProcessStepRequest request) {
+        ProcessStep step = processStepRepository.save(processStepMapper.toEntity(request));
+        return processStepMapper.toResponse(step);
+    }
+
+    @Transactional
+    public ProcessStepResponse updateProcessStep(UUID processStepId, @NonNull UpdateProcessStepRequest request) {
+        ProcessStep processStep = processStepRepository.findById(processStepId)
+                .orElseThrow(() -> new NotFoundException(
+                        "ProcessStep " + processStepId + " not found"));
+
+
+        if (request.name() != null) {
+            processStep.setName(request.name());
+        }
+
+        if (request.description() != null) {
+            processStep.setDescription(request.description());
+        }
+
+        if (request.requiresInterview() != null) {
+            processStep.setRequiresInterview(request.requiresInterview());
+        }
+
+        if (request.requiresDepartmentApproval() != null) {
+            processStep.setRequiresDepartmentApproval(
+                    request.requiresDepartmentApproval()
+            );
+        }
+
+        return processStepMapper.toResponse(processStep);
+    }
+
+    @Transactional
+    public void deleteProcessStep(UUID id) {
+        ProcessStep processStep = processStepRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(
+                        "ProcessStep " + id + " not found"));
+
+        if (processStep.isDeleted()) {
+            throw new InvalidEntityStateException(
+                    "ProcessStep " + id + " already deleted"
+            );
+        }
+
+        processStep.setDeleted(true);
+    }
+
+    @Transactional
+    public void restoreProcessStep(UUID id) {
+        ProcessStep processStep = processStepRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(
+                        "ProcessStep " + id + " not found"));
+
+        if (!processStep.isDeleted()) {
+            throw new InvalidEntityStateException(
+                    "ProcessStep " + id + " is not deleted"
+            );
+        }
+
+        processStep.setDeleted(false);
+    }
+}

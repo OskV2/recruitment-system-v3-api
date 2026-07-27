@@ -1,4 +1,4 @@
-package com.szponty.recruitment_system.recruitmentProcess.model;
+package com.szponty.recruitment_system.recruitmentprocess.model;
 
 
 import jakarta.persistence.*;
@@ -22,15 +22,19 @@ public class RecruitmentProcess {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false)
     private String name;
     private String description;
 
     @ColumnDefault("false")
+    @Column(nullable = false)
     private boolean deleted;
 
     @CreationTimestamp
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 }

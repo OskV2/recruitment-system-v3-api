@@ -1,7 +1,7 @@
 package com.szponty.recruitment_system.jobApplication.model;
 
 import com.szponty.recruitment_system.joboffer.model.JobOffer;
-import com.szponty.recruitment_system.recruitmentProcess.model.RecruitmentProcessVersion;
+import com.szponty.recruitment_system.recruitmentprocess.model.RecruitmentProcessVersion;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
