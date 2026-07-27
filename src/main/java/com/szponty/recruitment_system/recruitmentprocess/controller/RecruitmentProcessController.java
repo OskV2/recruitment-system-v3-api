@@ -3,11 +3,8 @@ package com.szponty.recruitment_system.recruitmentprocess.controller;
 
 import com.szponty.recruitment_system.recruitmentprocess.DTO.CreateRecruitmentProcessRequest;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.RecruitmentProcessResponse;
-import com.szponty.recruitment_system.recruitmentprocess.DTO.RecruitmentProcessVersionResponse;
 import com.szponty.recruitment_system.recruitmentprocess.DTO.UpdateRecruitmentProcessRequest;
-import com.szponty.recruitment_system.recruitmentprocess.service.ProcessStepService;
 import com.szponty.recruitment_system.recruitmentprocess.service.RecruitmentProcessService;
-import com.szponty.recruitment_system.recruitmentprocess.service.RecruitmentProcessVersionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -60,7 +57,7 @@ public class RecruitmentProcessController {
     @PatchMapping("/{id}/activate/{version}")
     public ResponseEntity<Void> activateVersion(@PathVariable UUID id, @PathVariable Integer version) {
         recruitmentProcessService.activateVersion(id, version);
-        return  ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/restore")

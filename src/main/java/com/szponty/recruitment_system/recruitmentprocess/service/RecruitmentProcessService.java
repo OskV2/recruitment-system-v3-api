@@ -54,7 +54,7 @@ public class RecruitmentProcessService {
 
     @Transactional(readOnly = true)
     public List<RecruitmentProcessResponse> getRecruitmentProcessById(UUID id, String version, boolean includeSteps) {
-        RecruitmentProcess process = recruitmentProcessRepository.findById(id)
+        recruitmentProcessRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("RecruitmentProcess " + id + " not found"));
 
         List<RecruitmentProcessVersion> versions = resolveVersions(id, version);
@@ -102,11 +102,6 @@ public RecruitmentProcessResponse updateRecruitmentProcess(UUID id, UpdateRecrui
 
     return processMapper.toResponse(newVersion);
 }
-
-//    @Transactional(readOnly = true)
-//    public RecruitmentProcessResponse getRecruitmentProcessById(UUID id) {
-//        return new RecruitmentProcessResponse(
-//    }
 
     @Transactional
     public RecruitmentProcessResponse createRecruitmentProcess(CreateRecruitmentProcessRequest request) {

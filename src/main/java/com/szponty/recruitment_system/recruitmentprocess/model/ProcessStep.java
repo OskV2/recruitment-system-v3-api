@@ -25,11 +25,10 @@ public class ProcessStep {
 
     @NotBlank
     @Size(max = 50)
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false)
     private String name;
 
     @Size(max = 255)
-    @Column(length = 255)
     private String description;
 
     @Column(name = "requires_interview", nullable = false)
