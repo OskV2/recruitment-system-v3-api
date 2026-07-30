@@ -1,5 +1,6 @@
 package com.szponty.recruitment_system.dictionary.service;
 
+import com.szponty.recruitment_system.common.exception.NotFoundException;
 import com.szponty.recruitment_system.dictionary.dto.DictionaryItemRequest;
 import com.szponty.recruitment_system.dictionary.dto.DictionaryItemResponse;
 import com.szponty.recruitment_system.dictionary.mapper.DictionaryMapper;
@@ -46,7 +47,7 @@ public abstract class AbstractDictionaryService<T extends DictionaryEntity> {
     public DictionaryItemResponse update(UUID id, DictionaryItemRequest request) {
         T entity = repository.findById(id)
                 .filter(item -> !item.isDeleted())
-                .orElseThrow(() -> new IllegalArgumentException("Dictionary item not found"));
+                .orElseThrow(() -> new NotFoundException("Dictionary item not found"));
 
         entity.setName(request.name());
         entity.setDescription(request.description());

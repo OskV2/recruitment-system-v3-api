@@ -1,11 +1,12 @@
 package com.szponty.recruitment_system.dictionary.service;
 
-import com.szponty.recruitment_system.common.exception.ResourceNotFoundException;
+import com.szponty.recruitment_system.common.exception.NotFoundException;
 import com.szponty.recruitment_system.dictionary.dto.DictionaryItemRequest;
 import com.szponty.recruitment_system.dictionary.dto.DictionaryItemResponse;
 import com.szponty.recruitment_system.dictionary.mapper.DictionaryMapper;
 import com.szponty.recruitment_system.dictionary.model.Benefit;
 import com.szponty.recruitment_system.dictionary.repository.BenefitRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,126 +26,98 @@ class BenefitServiceTest {
     @Mock
     private BenefitRepository benefitRepository;
 
-    @Mock
     private DictionaryMapper dictionaryMapper;
-
-    @InjectMocks
     private BenefitService benefitService;
+
+    private UUID benefitId;
+    private Benefit benefit;
+    private DictionaryItemRequest createRequest;
+    private DictionaryItemRequest updateRequest;
+
+    @BeforeEach
+    void setUp() {
+        dictionaryMapper = new DictionaryMapper();
+        benefitService = new BenefitService(benefitRepository, dictionaryMapper);
+
+        benefitId = UUID.randomUUID();
+
+        benefit = Benefit.builder()
+                .id(benefitId)
+                .name("Benefit name")
+                .description("Benefit description")
+                .deleted(false)
+                .build();
+
+        createRequest = new DictionaryItemRequest(
+                "Benefit name",
+                "Benefit description"
+        );
+
+        updateRequest = new DictionaryItemRequest(
+                "Multisport",
+                "Sports card"
+        );
+    }
 
     @Test
     void shouldCreateBenefit() {
-        DictionaryItemRequest request = new DictionaryItemRequest(
-                "Private healthcare",
-                "Luxmed package"
-        );
+        mockSave(benefit);
+        
+        DictionaryItemResponse result = benefitService.create(createRequest);
 
-        Benefit savedBenefit = Benefit.builder()
-                .id(UUID.randomUUID())
-                .name("Private healthcare")
-                .description("Luxmed package")
-                .build();
-
-        DictionaryItemResponse response = new DictionaryItemResponse(
-                savedBenefit.getId(),
-                "Private healthcare",
-                "Luxmed package",
-                LocalDateTime.now()
-        );
-
-        when(benefitRepository.save(any(Benefit.class)))
-                .thenReturn(savedBenefit);
-
-        when(dictionaryMapper.toDictionaryItemResponse(savedBenefit))
-                .thenReturn(response);
-
-        DictionaryItemResponse result = benefitService.create(request);
-
-        assertEquals("Private healthcare", result.name());
-        assertEquals("Luxmed package", result.description());
-
-        verify(benefitRepository).save(any(Benefit.class));
-        verify(dictionaryMapper).toDictionaryItemResponse(savedBenefit);
+        assertEquals(benefit.getId(), result.id());
+        assertEquals("Benefit name", result.name());
+        assertEquals("Benefit description", result.description());
     }
 
     @Test
     void shouldUpdateBenefit() {
-        UUID benefitId = UUID.randomUUID();
+        mockBenefitExists();
+        mockSave(benefit);
 
-        DictionaryItemRequest request = new DictionaryItemRequest(
-                "Multisport",
-                "Sports card"
-        );
+        assertEquals("Benefit name", benefit.getName());
+        assertEquals("Benefit description", benefit.getDescription());
 
-        Benefit benefit = Benefit.builder()
-                .id(benefitId)
-                .name("Old name")
-                .description("Old description")
-                .build();
-
-        DictionaryItemResponse response = new DictionaryItemResponse(
-                benefitId,
-                "Multisport",
-                "Sports card",
-                LocalDateTime.now()
-        );
-
-        when(benefitRepository.findById(benefitId))
-                .thenReturn(Optional.of(benefit));
-
-        when(dictionaryMapper.toDictionaryItemResponse(benefit))
-                .thenReturn(response);
-
-        DictionaryItemResponse result = benefitService.update(benefitId, request);
-
-        assertEquals("Multisport", benefit.getName());
-        assertEquals("Sports card", benefit.getDescription());
+        DictionaryItemResponse result = benefitService.update(benefitId, updateRequest);
 
         assertEquals("Multisport", result.name());
         assertEquals("Sports card", result.description());
 
         verify(benefitRepository).findById(benefitId);
-        verify(dictionaryMapper).toDictionaryItemResponse(benefit);
-    }
-
-    @Test
-    void shouldThrowWhenBenefitDoesNotExistOnUpdate() {
-        UUID benefitId = UUID.randomUUID();
-
-        DictionaryItemRequest request = new DictionaryItemRequest(
-                "Multisport",
-                "Sports card"
-        );
-
-        when(benefitRepository.findById(benefitId))
-                .thenReturn(Optional.empty());
-
-        assertThrows(
-                ResourceNotFoundException.class,
-                () -> benefitService.update(benefitId, request)
-        );
-
-        verify(benefitRepository).findById(benefitId);
-        verify(dictionaryMapper, never()).toDictionaryItemResponse(any());
+        verify(benefitRepository).save(benefit);
     }
 
     @Test
     void shouldSoftDeleteBenefit() {
-        UUID benefitId = UUID.randomUUID();
-
-        Benefit benefit = Benefit.builder()
-                .id(benefitId)
-                .name("Multisport")
-                .description("Sports card")
-                .deleted(false)
-                .build();
-
-        when(benefitRepository.findById(benefitId))
-                .thenReturn(Optional.of(benefit));
+        mockBenefitExists();
 
         benefitService.delete(benefitId);
-
         assertTrue(benefit.isDeleted());
-
         verify(benefitRepository).findById(benefitId);
+    }
+
+    @Test
+    void shouldThrowWhenBenefitDoesNotExistOnUpdate() {
+        mockBenefitDoesNotExist();
+
+        assertThrows(
+                NotFoundException.class,
+                () -> benefitService.update(benefitId, updateRequest)
+        );
+    }
+
+    private void mockBenefitExists() {
+        when(benefitRepository.findById(benefitId))
+                .thenReturn(Optional.of(benefit));
+    }
+
+    private void mockBenefitDoesNotExist() {
+        when(benefitRepository.findById(benefitId))
+                .thenReturn(Optional.empty());
+    }
+
+    private void mockSave(Benefit savedBenefit) {
+        when(benefitRepository.save(any(Benefit.class)))
+                .thenReturn(savedBenefit);
     }
 }
