@@ -5,7 +5,6 @@ import com.szponty.recruitment_system.dictionary.dto.LocationRequest;
 import com.szponty.recruitment_system.dictionary.dto.LocationResponse;
 import com.szponty.recruitment_system.dictionary.model.DictionaryEntity;
 import com.szponty.recruitment_system.dictionary.model.Location;
-import jakarta.persistence.metamodel.Type;
 import org.springframework.stereotype.Component;
 
 @Component
