@@ -24,7 +24,6 @@ class BenefitServiceTest {
     @Mock
     private BenefitRepository benefitRepository;
 
-    private DictionaryMapper dictionaryMapper;
     private BenefitService benefitService;
 
     private UUID benefitId;
@@ -34,7 +33,7 @@ class BenefitServiceTest {
 
     @BeforeEach
     void setUp() {
-        dictionaryMapper = new DictionaryMapper();
+        DictionaryMapper dictionaryMapper = new DictionaryMapper();
         benefitService = new BenefitService(benefitRepository, dictionaryMapper);
 
         benefitId = UUID.randomUUID();
