@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/interview")
+@RequestMapping("/api/interviews")
 public class InterviewController {
     private final InterviewService interviewService;
     private final LoggedUserService loggedUserService;

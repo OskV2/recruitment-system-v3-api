@@ -28,16 +28,23 @@ public class InterviewService {
         return interviewMapper.toResponse(interview);
     }
 
-    // TODO: implement once JobApplicationStepRepository is available
     @Transactional(readOnly = true)
-    public InterviewResponse getInterviewByJobApplicationStepId(UUID jobApplicationStepId) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+    public InterviewResponse getInterviewByIdAndJobApplicationId(UUID jobApplicationId, UUID interviewId) {
+        Interview interview = interviewRepository.findByIdAndJobApplicationId(interviewId, jobApplicationId)
+                .orElseThrow(() -> new InvalidEntityStateException(
+                        "Interview " + interviewId +
+                        " does not belong to job application " + jobApplicationId
+                ));
+
+        return interviewMapper.toResponse(interview);
     }
 
-    // TODO: implement once JobApplicationRepository is available
     @Transactional(readOnly = true)
     public List<InterviewResponse> getInterviewsForJobApplication(UUID jobApplicationId) {
-        throw new UnsupportedOperationException("Not implemented yet.");
+        List<Interview> interviews = interviewRepository.findByJobApplicationId(jobApplicationId);
+        return interviews.stream()
+                .map(interviewMapper::toResponse)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -55,12 +62,17 @@ public class InterviewService {
     }
 
     @Transactional
-    public void deleteInterview(UUID uuid) {
-        Interview interview = interviewRepository.getOrThrow(uuid, "Interview");
+    public void deleteInterview(UUID jobApplicationId, UUID interviewId) {
+        Interview interview = interviewRepository
+                .findByIdAndJobApplicationId(interviewId, jobApplicationId)
+                .orElseThrow(() -> new InvalidEntityStateException(
+                        "Interview " + interviewId +
+                                " does not belong to job application " + jobApplicationId
+                ));
 
         if (interview.isDeleted()) {
             throw new InvalidEntityStateException(
-                    "Interview " + uuid + " already deleted"
+                    "Interview " + interviewId + " already deleted"
             );
         }
 
@@ -68,12 +80,17 @@ public class InterviewService {
     }
 
     @Transactional
-    public void restoreInterview(UUID uuid) {
-        Interview interview = interviewRepository.getOrThrow(uuid, "Interview");
+    public void restoreInterview(UUID jobApplicationId, UUID interviewId) {
+        Interview interview = interviewRepository
+                .findByIdAndJobApplicationId(interviewId, jobApplicationId)
+                .orElseThrow(() -> new InvalidEntityStateException(
+                        "Interview " + interviewId +
+                                " does not belong to job application " + jobApplicationId
+                ));
 
         if (!interview.isDeleted()) {
             throw new InvalidEntityStateException(
-                    "Interview " + uuid + " is not deleted"
+                    "Interview " + interviewId + " is not deleted"
             );
         }
 
