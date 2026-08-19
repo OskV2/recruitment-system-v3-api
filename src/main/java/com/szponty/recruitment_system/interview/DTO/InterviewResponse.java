@@ -1,4 +1,4 @@
-package com.szponty.recruitment_system.interview.dto;
+package com.szponty.recruitment_system.interview.DTO;
 
 import com.szponty.recruitment_system.interview.model.InterviewStatus;
 import com.szponty.recruitment_system.jobApplication.model.JobApplication;

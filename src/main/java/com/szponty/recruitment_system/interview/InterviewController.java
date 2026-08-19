@@ -1,13 +1,11 @@
 package com.szponty.recruitment_system.interview;
 
 import com.szponty.recruitment_system.auth.service.LoggedUserService;
-import com.szponty.recruitment_system.interview.dto.InterviewResponse;
+import com.szponty.recruitment_system.interview.DTO.InterviewResponse;
 import com.szponty.recruitment_system.interview.model.InterviewStatus;
 import com.szponty.recruitment_system.interview.service.InterviewService;
-import com.szponty.recruitment_system.user.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

@@ -38,4 +38,6 @@ public interface InterviewRepository extends FindOrThrowRepository<Interview, UU
         WHERE i.jobApplicationStep.jobApplication.id = :jobApplicationId
     """)
     List<Interview> findByJobApplicationId(UUID jobApplicationId);
+
+    boolean existsByJobApplicationStepId(UUID jobApplicationStepId);
 }
