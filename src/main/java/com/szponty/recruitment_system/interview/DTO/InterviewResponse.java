@@ -9,8 +9,8 @@ import java.util.UUID;
 
 public record InterviewResponse(
         UUID id,
-        JobApplication jobApplication,
-        User recruiter,
+        InterviewJobApplicationResponse jobApplication,
+        InterviewRecruiterResponse recruiter,
         LocalDateTime scheduledStart,
         LocalDateTime scheduledEnd,
         InterviewStatus status,

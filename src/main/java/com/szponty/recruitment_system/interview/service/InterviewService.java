@@ -4,6 +4,7 @@ import com.szponty.recruitment_system.common.exception.InvalidEntityStateExcepti
 import com.szponty.recruitment_system.interview.DTO.CreateInterviewRequest;
 import com.szponty.recruitment_system.interview.DTO.InterviewResponse;
 import com.szponty.recruitment_system.interview.DTO.UpdateInterviewRequest;
+import com.szponty.recruitment_system.interview.event.InterviewRescheduledEvent;
 import com.szponty.recruitment_system.interview.mapper.InterviewMapper;
 import com.szponty.recruitment_system.interview.model.Interview;
 import com.szponty.recruitment_system.interview.model.InterviewStatus;
@@ -14,6 +15,7 @@ import com.szponty.recruitment_system.jobApplication.repository.JobApplicationSt
 import com.szponty.recruitment_system.user.model.User;
 import com.szponty.recruitment_system.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,7 @@ public class InterviewService {
     private final UserRepository userRepository;
     private final JobApplicationStepRepository jobApplicationStepRepository;
     private final InterviewMapper interviewMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public InterviewResponse getInterviewById(UUID id) {
@@ -130,6 +133,12 @@ public class InterviewService {
             );
         }
 
+        LocalDateTime oldStart = interview.getScheduledStart();
+        LocalDateTime oldEnd = interview.getScheduledEnd();
+        String oldLocation = interview.getLocation();
+        String oldMeetingUrl = interview.getMeetingUrl();
+
+
         if (request.recruiterId() != null) {
             User recruiter = userRepository.getOrThrow(request.recruiterId(), "User");
             interview.setRecruiter(recruiter);
@@ -153,6 +162,23 @@ public class InterviewService {
 
         if (request.status() != null) {
             interview.setStatus(request.status());
+        }
+
+        boolean candidateRelevantChange =
+                !oldStart.equals(interview.getScheduledStart())
+                        || !oldEnd.equals(interview.getScheduledEnd())
+                        || !java.util.Objects.equals(oldLocation, interview.getLocation())
+                        || !java.util.Objects.equals(oldMeetingUrl, interview.getMeetingUrl());
+
+        if (candidateRelevantChange) {
+            eventPublisher.publishEvent(new InterviewRescheduledEvent(
+                    interview.getId(),
+                    jobApplicationId,
+                    oldStart, interview.getScheduledStart(),
+                    oldEnd, interview.getScheduledEnd(),
+                    oldLocation, interview.getLocation(),
+                    oldMeetingUrl, interview.getMeetingUrl()
+            ));
         }
 
         return interviewMapper.toResponse(interview);
