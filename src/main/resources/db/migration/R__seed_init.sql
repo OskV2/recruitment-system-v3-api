@@ -305,3 +305,220 @@ VALUES ('c0000000-0000-0000-0000-000000000001',
         NOW() + INTERVAL '2 day' + INTERVAL '1 hour',
         'Google Meet',
         'https://meet.google.com/test');
+
+
+-- DODATKOWY REKRUTER (do testowania getAssignedInterviews per recruiter)
+
+INSERT INTO app_user (id,
+                      first_name,
+                      last_name,
+                      email,
+                      password,
+                      description,
+                      locked,
+                      role_id,
+                      department_id,
+                      created_at,
+                      updated_at)
+VALUES ('d4444444-4444-4444-4444-444444444444',
+        'Ewa',
+        'Nowak',
+        'ewa.recruiter@test.com',
+        '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
+        'Second recruiter',
+        FALSE,
+        '22222222-2222-2222-2222-222222222222',
+        'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+        NOW(),
+        NOW());
+
+-- DODATKOWE APLIKACJE (na tę samą ofertę co istniejąca)
+
+INSERT INTO job_application(id,
+                            public_token,
+                            job_offer_id,
+                            recruitment_process_version_id,
+                            first_name,
+                            last_name,
+                            email,
+                            phone_number,
+                            github_link,
+                            status)
+VALUES
+    -- Anna: w trakcie HR Interview (CURRENT, ma już zaplanowany interview -> do testów GET/PATCH/DELETE/RESTORE)
+    ('a0000000-0000-0000-0000-000000000002',
+     'a0000000-0000-0000-0000-000000000998',
+     '90000000-0000-0000-0000-000000000001',
+     '70000000-0000-0000-0000-000000000001',
+     'Anna', 'Kowalska', 'anna.kowalska@test.com',
+     '+48111222333', 'https://github.com/annakowalska', 'IN_PROGRESS'),
+
+    -- Piotr: krok HR Interview w stanie WAITING, BEZ interview -> do testów createInterview (POST)
+    ('a0000000-0000-0000-0000-000000000003',
+     'a0000000-0000-0000-0000-000000000997',
+     '90000000-0000-0000-0000-000000000001',
+     '70000000-0000-0000-0000-000000000001',
+     'Piotr', 'Zieliński', 'piotr.zielinski@test.com',
+     '+48222333444', 'https://github.com/piotrzielinski', 'IN_PROGRESS'),
+
+    -- Marta: dopiero CV Review (krok nie wymaga interview) -> ciekawy edge case
+    ('a0000000-0000-0000-0000-000000000004',
+     'a0000000-0000-0000-0000-000000000996',
+     '90000000-0000-0000-0000-000000000001',
+     '70000000-0000-0000-0000-000000000001',
+     'Marta', 'Wiśniewska', 'marta.wisniewska@test.com',
+     '+48333444555', 'https://github.com/martawisniewska', 'SUBMITTED'),
+
+    -- Tomasz: odrzucony na HR Interview, interview COMPLETED -> do testów statusów/filtrowania
+    ('a0000000-0000-0000-0000-000000000005',
+     'a0000000-0000-0000-0000-000000000995',
+     '90000000-0000-0000-0000-000000000001',
+     '70000000-0000-0000-0000-000000000001',
+     'Tomasz', 'Nowak', 'tomasz.nowak@test.com',
+     '+48444555666', 'https://github.com/tomasznowak', 'REJECTED'),
+
+    -- Kasia: interview CANCELLED i USUNIĘTY (deleted=TRUE) -> do testów restoreInterview
+    ('a0000000-0000-0000-0000-000000000006',
+     'a0000000-0000-0000-0000-000000000994',
+     '90000000-0000-0000-0000-000000000001',
+     '70000000-0000-0000-0000-000000000001',
+     'Kasia', 'Lewandowska', 'kasia.lewandowska@test.com',
+     '+48555666777', 'https://github.com/kasialewandowska', 'IN_PROGRESS');
+
+-- KROKI APLIKACJI
+
+INSERT INTO job_application_step(id,
+                                 application_id,
+                                 process_step_id,
+                                 step_order,
+                                 status,
+                                 started_at,
+                                 started_by_user_id,
+                                 completed_at,
+                                 completed_by_user_id,
+                                 rejected_at,
+                                 rejected_by_user_id,
+                                 decision_comment,
+                                 rejection_reason)
+VALUES
+    -- Anna: CV Review COMPLETED
+    ('b0000000-0000-0000-0000-000000000002',
+     'a0000000-0000-0000-0000-000000000002',
+     '80000000-0000-0000-0000-000000000001',
+     1, 'COMPLETED',
+     NOW() - INTERVAL '3 day', 'd2222222-2222-2222-2222-222222222222',
+     NOW() - INTERVAL '2 day', 'd2222222-2222-2222-2222-222222222222',
+     NULL, NULL, 'Good CV, solid experience', NULL),
+
+    -- Anna: HR Interview CURRENT (będzie miała interview poniżej)
+    ('b0000000-0000-0000-0000-000000000003',
+     'a0000000-0000-0000-0000-000000000002',
+     '80000000-0000-0000-0000-000000000002',
+     2, 'CURRENT',
+     NOW() - INTERVAL '1 day', 'd2222222-2222-2222-2222-222222222222',
+     NULL, NULL, NULL, NULL, NULL, NULL),
+
+    -- Piotr: CV Review COMPLETED
+    ('b0000000-0000-0000-0000-000000000004',
+     'a0000000-0000-0000-0000-000000000003',
+     '80000000-0000-0000-0000-000000000001',
+     1, 'COMPLETED',
+     NOW() - INTERVAL '4 day', 'd2222222-2222-2222-2222-222222222222',
+     NOW() - INTERVAL '3 day', 'd2222222-2222-2222-2222-222222222222',
+     NULL, NULL, 'Meets requirements', NULL),
+
+    -- Piotr: HR Interview WAITING, brak interview -> użyj do POST createInterview
+    ('b0000000-0000-0000-0000-000000000005',
+     'a0000000-0000-0000-0000-000000000003',
+     '80000000-0000-0000-0000-000000000002',
+     2, 'WAITING',
+     NOW() - INTERVAL '3 day', 'd2222222-2222-2222-2222-222222222222',
+     NULL, NULL, NULL, NULL, NULL, NULL),
+
+    -- Marta: CV Review CURRENT (krok nie wymaga interview)
+    ('b0000000-0000-0000-0000-000000000006',
+     'a0000000-0000-0000-0000-000000000004',
+     '80000000-0000-0000-0000-000000000001',
+     1, 'CURRENT',
+     NOW(), 'd4444444-4444-4444-4444-444444444444',
+     NULL, NULL, NULL, NULL, NULL, NULL),
+
+    -- Tomasz: CV Review COMPLETED
+    ('b0000000-0000-0000-0000-000000000007',
+     'a0000000-0000-0000-0000-000000000005',
+     '80000000-0000-0000-0000-000000000001',
+     1, 'COMPLETED',
+     NOW() - INTERVAL '10 day', 'd2222222-2222-2222-2222-222222222222',
+     NOW() - INTERVAL '9 day', 'd2222222-2222-2222-2222-222222222222',
+     NULL, NULL, 'Ok candidate', NULL),
+
+    -- Tomasz: HR Interview REJECTED (miał interview, poniżej COMPLETED)
+    ('b0000000-0000-0000-0000-000000000008',
+     'a0000000-0000-0000-0000-000000000005',
+     '80000000-0000-0000-0000-000000000002',
+     2, 'REJECTED',
+     NOW() - INTERVAL '8 day', 'd4444444-4444-4444-4444-444444444444',
+     NULL, NULL,
+     NOW() - INTERVAL '6 day', 'd4444444-4444-4444-4444-444444444444',
+     NULL, 'Insufficient communication skills'),
+
+    -- Kasia: HR Interview CURRENT (interview do niej będzie CANCELLED + deleted)
+    ('b0000000-0000-0000-0000-000000000009',
+     'a0000000-0000-0000-0000-000000000006',
+     '80000000-0000-0000-0000-000000000002',
+     2, 'CURRENT',
+     NOW() - INTERVAL '1 day', 'd4444444-4444-4444-4444-444444444444',
+     NULL, NULL, NULL, NULL, NULL, NULL);
+
+-- INTERVIEWS
+
+INSERT INTO interview(id,
+                      job_application_id,
+                      job_application_step_id,
+                      recruiter_id,
+                      scheduled_start,
+                      scheduled_end,
+                      status,
+                      location,
+                      meeting_url,
+                      notes,
+                      deleted)
+VALUES
+    -- Anna: SCHEDULED, recruiter d2222222 (do testów GET/PATCH/DELETE)
+    ('c0000000-0000-0000-0000-000000000002',
+     'a0000000-0000-0000-0000-000000000002',
+     'b0000000-0000-0000-0000-000000000003',
+     'd2222222-2222-2222-2222-222222222222',
+     NOW() + INTERVAL '3 day',
+     NOW() + INTERVAL '3 day' + INTERVAL '45 minute',
+     'SCHEDULED',
+     'Google Meet',
+     'https://meet.google.com/anna-hr',
+     NULL,
+     FALSE),
+
+    -- Tomasz: COMPLETED, recruiter d4444444, w przeszłości (do testów filtrowania po statusie)
+    ('c0000000-0000-0000-0000-000000000003',
+     'a0000000-0000-0000-0000-000000000005',
+     'b0000000-0000-0000-0000-000000000008',
+     'd4444444-4444-4444-4444-444444444444',
+     NOW() - INTERVAL '7 day',
+     NOW() - INTERVAL '7 day' + INTERVAL '1 hour',
+     'COMPLETED',
+     'Office - Warsaw',
+     NULL,
+     'Candidate struggled with basic questions',
+     FALSE),
+
+    -- Kasia: CANCELLED i USUNIĘTY -> do testów restoreInterview
+    ('c0000000-0000-0000-0000-000000000004',
+     'a0000000-0000-0000-0000-000000000006',
+     'b0000000-0000-0000-0000-000000000009',
+     'd4444444-4444-4444-4444-444444444444',
+     NOW() + INTERVAL '1 day',
+     NOW() + INTERVAL '1 day' + INTERVAL '30 minute',
+     'CANCELLED',
+     'Google Meet',
+     'https://meet.google.com/kasia-hr',
+     'Candidate asked to reschedule, then withdrew',
+     TRUE);
