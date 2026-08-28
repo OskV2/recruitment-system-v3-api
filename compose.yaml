@@ -7,3 +7,32 @@ services:
       - 'POSTGRES_USER=myuser'
     ports:
       - '5432:5432'
+
+  seaweedfs:
+    image: chrislusf/seaweedfs:latest
+    command: server -s3 -dir=/data -ip.bind=0.0.0.0 -master.volumeSizeLimitMB=1024
+    ports:
+      - '9333:9333'   # master (API + UI)
+      - '8080:8080'   # volume server
+      - '8888:8888'   # filer
+      - '8333:8333'   # S3 API gateway
+    volumes:
+      - seaweedfs_data:/data
+
+  seaweedfs-init:
+    image: chrislusf/seaweedfs:latest
+    depends_on:
+      - seaweedfs
+    entrypoint: [ "sh", "-c" ]
+    command:
+      - >
+        until echo "s3.bucket.list" | weed shell -master=seaweedfs:9333 >/dev/null 2>&1; do
+          echo "waiting for seaweedfs...";
+          sleep 2;
+        done;
+        echo "s3.bucket.create -name cv-attachments" | weed shell -master=seaweedfs:9333 || true;
+        echo "bucket ready";
+    restart: "no"
+
+volumes:
+  seaweedfs_data:
