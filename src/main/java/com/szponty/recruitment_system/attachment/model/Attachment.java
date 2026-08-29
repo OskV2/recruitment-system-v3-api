@@ -5,7 +5,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -30,6 +32,17 @@ public class Attachment {
 
     @Column(name = "isCv")
     boolean cv;
+
+    private String contentType;
+
+    private Long sizeBytes;
+
+    private String checksumSha256;
+
+    @Column(name = "status", nullable = false, columnDefinition = "attachment_status")
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    private AttachmentStatus status;
 
     @ManyToOne
     @JoinColumn(name = "job_application_id")

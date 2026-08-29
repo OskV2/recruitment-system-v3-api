@@ -38,4 +38,13 @@ public class GlobalExceptionHandler {
 
         return pd;
     }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ProblemDetail handleBadRequest(BadRequestException ex) {
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        pd.setTitle("Bad request");
+        pd.setDetail(ex.getMessage());
+        pd.setType(URI.create("https://api.toimplement.com/errors/bad-request"));
+        return pd;
+    }
 }
