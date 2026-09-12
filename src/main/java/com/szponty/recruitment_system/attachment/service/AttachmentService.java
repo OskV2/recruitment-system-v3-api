@@ -2,6 +2,7 @@ package com.szponty.recruitment_system.attachment.service;
 
 import com.szponty.recruitment_system.attachment.dto.CreateAttachmentRequest;
 import com.szponty.recruitment_system.attachment.dto.InitiateUploadResponse;
+import com.szponty.recruitment_system.attachment.event.AttachmentUploadedEvent;
 import com.szponty.recruitment_system.attachment.model.Attachment;
 import com.szponty.recruitment_system.attachment.model.AttachmentStatus;
 import com.szponty.recruitment_system.attachment.repository.AttachmentRepository;
@@ -10,6 +11,7 @@ import com.szponty.recruitment_system.common.exception.InvalidEntityStateExcepti
 import com.szponty.recruitment_system.jobApplication.model.JobApplication;
 import com.szponty.recruitment_system.jobApplication.repository.JobApplicationRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +35,7 @@ public class AttachmentService {
     private final AttachmentRepository attachmentRepository;
     private final JobApplicationRepository jobApplicationRepository;
     private final StorageService storageService;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final String bucket;
 
@@ -40,11 +43,13 @@ public class AttachmentService {
             AttachmentRepository attachmentRepository,
             JobApplicationRepository jobApplicationRepository,
             StorageService storageService,
+            ApplicationEventPublisher eventPublisher,
             @Value("${app.s3.bucket}") String bucket
     ) {
         this.attachmentRepository = attachmentRepository;
         this.jobApplicationRepository = jobApplicationRepository;
         this.storageService = storageService;
+        this.eventPublisher = eventPublisher;
         this.bucket = bucket;
     }
 
@@ -97,6 +102,8 @@ public class AttachmentService {
         }
 
         attachment.setStatus(AttachmentStatus.ACTIVE);
+
+        eventPublisher.publishEvent(new AttachmentUploadedEvent(attachment.getId(), attachment.getStoredName()));
     }
 
     private void validateFileMetadata(CreateAttachmentRequest request) {

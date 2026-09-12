@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -44,12 +45,15 @@ public class AttachmentServiceTest {
     @Mock
     private StorageService storageService;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     private AttachmentService attachmentService;
 
     @BeforeEach
     void setUp() {
         attachmentService = new AttachmentService(
-                attachmentRepository, jobApplicationRepository, storageService, "test-bucket"
+                attachmentRepository, jobApplicationRepository, storageService, eventPublisher, "test-bucket"
         );
     }
 

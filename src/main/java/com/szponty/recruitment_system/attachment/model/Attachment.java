@@ -48,6 +48,8 @@ public class Attachment {
     @JoinColumn(name = "job_application_id")
     private JobApplication jobApplication;
 
+    private String extractedText;
+
     @ColumnDefault("false")
     private boolean deleted;
 

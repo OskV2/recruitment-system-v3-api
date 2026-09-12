@@ -4,12 +4,14 @@ import com.szponty.recruitment_system.attachment.service.StorageService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.scheduling.annotation.EnableAsync;
 import software.amazon.awssdk.services.s3.S3Client;
 
 import java.net.URL;
 import java.time.Duration;
 
 @SpringBootApplication
+@EnableAsync
 public class RecruitmentSystemApplication {
 
 
