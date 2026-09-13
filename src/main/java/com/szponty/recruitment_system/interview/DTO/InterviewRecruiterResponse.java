@@ -1,0 +1,11 @@
+package com.szponty.recruitment_system.interview.DTO;
+
+import java.util.UUID;
+
+public record InterviewRecruiterResponse(
+        UUID id,
+        String firstName,
+        String lastName,
+        String email
+) {
+}
