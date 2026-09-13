@@ -62,6 +62,7 @@ class InterviewServiceTest {
     private Interview scheduledInterview(UUID id, LocalDateTime start, LocalDateTime end) {
         return Interview.builder()
                 .id(id)
+                .jobApplication(JobApplication.builder().id(UUID.randomUUID()).build())
                 .scheduledStart(start)
                 .scheduledEnd(end)
                 .status(InterviewStatus.SCHEDULED)
@@ -94,37 +95,6 @@ class InterviewServiceTest {
                 .thenThrow(new ResourceNotFoundException("Interview", id));
 
         assertThrows(ResourceNotFoundException.class, () -> interviewService.getInterviewById(id));
-    }
-
-    // ---------- getInterviewByIdAndJobApplicationId ----------
-
-    @Test
-    void shouldGetInterviewByIdAndJobApplicationId() {
-        UUID jobApplicationId = UUID.randomUUID();
-        UUID interviewId = UUID.randomUUID();
-        Interview interview = scheduledInterview(interviewId, LocalDateTime.now(), LocalDateTime.now().plusHours(1));
-
-        when(interviewRepository.findByIdAndJobApplicationId(interviewId, jobApplicationId))
-                .thenReturn(Optional.of(interview));
-        when(interviewMapper.toResponse(interview)).thenReturn(dummyResponse);
-
-        InterviewResponse result = interviewService.getInterviewByIdAndJobApplicationId(jobApplicationId, interviewId);
-
-        assertEquals(dummyResponse, result);
-    }
-
-    @Test
-    void shouldThrowWhenInterviewDoesNotBelongToJobApplication() {
-        UUID jobApplicationId = UUID.randomUUID();
-        UUID interviewId = UUID.randomUUID();
-
-        when(interviewRepository.findByIdAndJobApplicationId(interviewId, jobApplicationId))
-                .thenReturn(Optional.empty());
-
-        assertThrows(
-                InvalidEntityStateException.class,
-                () -> interviewService.getInterviewByIdAndJobApplicationId(jobApplicationId, interviewId)
-        );
     }
 
     // ---------- getInterviewsForJobApplication ----------
@@ -302,23 +272,21 @@ class InterviewServiceTest {
     // ---------- updateInterviewDetails ----------
 
     @Test
-    void shouldThrowWhenUpdatingInterviewNotBelongingToJobApplication() {
-        UUID jobApplicationId = UUID.randomUUID();
+    void shouldThrowWhenUpdatingNonExistentInterview() {
         UUID interviewId = UUID.randomUUID();
         UpdateInterviewRequest request = new UpdateInterviewRequest(null, null, null, null, null, null);
 
-        when(interviewRepository.findByIdAndJobApplicationId(interviewId, jobApplicationId))
-                .thenReturn(Optional.empty());
+        when(interviewRepository.getOrThrow(interviewId, "Interview"))
+                .thenThrow(new ResourceNotFoundException("Interview", interviewId));
 
         assertThrows(
-                InvalidEntityStateException.class,
-                () -> interviewService.updateInterviewDetails(jobApplicationId, interviewId, request)
+                ResourceNotFoundException.class,
+                () -> interviewService.updateInterviewDetails(interviewId, request)
         );
     }
 
     @Test
     void shouldThrowWhenUpdatedStartIsAfterEnd() {
-        UUID jobApplicationId = UUID.randomUUID();
         UUID interviewId = UUID.randomUUID();
         LocalDateTime originalStart = LocalDateTime.now();
         LocalDateTime originalEnd = originalStart.plusHours(1);
@@ -328,12 +296,11 @@ class InterviewServiceTest {
                 null, originalEnd.plusHours(1), null, null, null, null
         );
 
-        when(interviewRepository.findByIdAndJobApplicationId(interviewId, jobApplicationId))
-                .thenReturn(Optional.of(interview));
+        when(interviewRepository.getOrThrow(interviewId, "Interview")).thenReturn(interview);
 
         assertThrows(
                 InvalidEntityStateException.class,
-                () -> interviewService.updateInterviewDetails(jobApplicationId, interviewId, request)
+                () -> interviewService.updateInterviewDetails(interviewId, request)
         );
 
         verify(eventPublisher, never()).publishEvent(any());
@@ -341,7 +308,6 @@ class InterviewServiceTest {
 
     @Test
     void shouldPublishEventWhenScheduledStartChanges() {
-        UUID jobApplicationId = UUID.randomUUID();
         UUID interviewId = UUID.randomUUID();
         LocalDateTime originalStart = LocalDateTime.now();
         LocalDateTime originalEnd = originalStart.plusHours(1);
@@ -350,11 +316,10 @@ class InterviewServiceTest {
         LocalDateTime newStart = originalStart.plusMinutes(15);
         UpdateInterviewRequest request = new UpdateInterviewRequest(null, newStart, null, null, null, null);
 
-        when(interviewRepository.findByIdAndJobApplicationId(interviewId, jobApplicationId))
-                .thenReturn(Optional.of(interview));
+        when(interviewRepository.getOrThrow(interviewId, "Interview")).thenReturn(interview);
         when(interviewMapper.toResponse(interview)).thenReturn(dummyResponse);
 
-        interviewService.updateInterviewDetails(jobApplicationId, interviewId, request);
+        interviewService.updateInterviewDetails(interviewId, request);
 
         assertEquals(newStart, interview.getScheduledStart());
 
@@ -363,7 +328,7 @@ class InterviewServiceTest {
         InterviewRescheduledEvent event = captor.getValue();
 
         assertEquals(interviewId, event.interviewId());
-        assertEquals(jobApplicationId, event.jobApplicationId());
+        assertEquals(interview.getJobApplication().getId(), event.jobApplicationId());
         assertEquals(originalStart, event.oldScheduledStart());
         assertEquals(newStart, event.newScheduledStart());
         assertEquals(originalEnd, event.oldScheduledEnd());
@@ -372,7 +337,6 @@ class InterviewServiceTest {
 
     @Test
     void shouldPublishEventWhenLocationChanges() {
-        UUID jobApplicationId = UUID.randomUUID();
         UUID interviewId = UUID.randomUUID();
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = start.plusHours(1);
@@ -380,11 +344,10 @@ class InterviewServiceTest {
 
         UpdateInterviewRequest request = new UpdateInterviewRequest(null, null, null, "New room", null, null);
 
-        when(interviewRepository.findByIdAndJobApplicationId(interviewId, jobApplicationId))
-                .thenReturn(Optional.of(interview));
+        when(interviewRepository.getOrThrow(interviewId, "Interview")).thenReturn(interview);
         when(interviewMapper.toResponse(interview)).thenReturn(dummyResponse);
 
-        interviewService.updateInterviewDetails(jobApplicationId, interviewId, request);
+        interviewService.updateInterviewDetails(interviewId, request);
 
         assertEquals("New room", interview.getLocation());
         verify(eventPublisher).publishEvent(any(InterviewRescheduledEvent.class));
@@ -392,7 +355,6 @@ class InterviewServiceTest {
 
     @Test
     void shouldPublishEventWhenMeetingUrlChanges() {
-        UUID jobApplicationId = UUID.randomUUID();
         UUID interviewId = UUID.randomUUID();
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = start.plusHours(1);
@@ -402,11 +364,10 @@ class InterviewServiceTest {
                 null, null, null, null, "https://meet.example.com/updated", null
         );
 
-        when(interviewRepository.findByIdAndJobApplicationId(interviewId, jobApplicationId))
-                .thenReturn(Optional.of(interview));
+        when(interviewRepository.getOrThrow(interviewId, "Interview")).thenReturn(interview);
         when(interviewMapper.toResponse(interview)).thenReturn(dummyResponse);
 
-        interviewService.updateInterviewDetails(jobApplicationId, interviewId, request);
+        interviewService.updateInterviewDetails(interviewId, request);
 
         assertEquals("https://meet.example.com/updated", interview.getMeetingUrl());
         verify(eventPublisher).publishEvent(any(InterviewRescheduledEvent.class));
@@ -418,7 +379,6 @@ class InterviewServiceTest {
         // scheduledStart/scheduledEnd/location/meetingUrl changes. Recruiter
         // reassignment alone does NOT trigger InterviewRescheduledEvent today,
         // even though the README's tracking-fields list includes "recruiter".
-        UUID jobApplicationId = UUID.randomUUID();
         UUID interviewId = UUID.randomUUID();
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = start.plusHours(1);
@@ -428,12 +388,11 @@ class InterviewServiceTest {
 
         UpdateInterviewRequest request = new UpdateInterviewRequest(newRecruiterId, null, null, null, null, null);
 
-        when(interviewRepository.findByIdAndJobApplicationId(interviewId, jobApplicationId))
-                .thenReturn(Optional.of(interview));
+        when(interviewRepository.getOrThrow(interviewId, "Interview")).thenReturn(interview);
         when(userRepository.getOrThrow(newRecruiterId, "User")).thenReturn(newRecruiter);
         when(interviewMapper.toResponse(interview)).thenReturn(dummyResponse);
 
-        interviewService.updateInterviewDetails(jobApplicationId, interviewId, request);
+        interviewService.updateInterviewDetails(interviewId, request);
 
         assertEquals(newRecruiter, interview.getRecruiter());
         verify(eventPublisher, never()).publishEvent(any());
@@ -443,7 +402,6 @@ class InterviewServiceTest {
     void shouldNotPublishEventWhenOnlyStatusChangesToCancelled() {
         // NOTE: same discrepancy as above — a bare status change to CANCELLED
         // (or RESCHEDULED) does not currently trigger the event by itself.
-        UUID jobApplicationId = UUID.randomUUID();
         UUID interviewId = UUID.randomUUID();
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = start.plusHours(1);
@@ -453,11 +411,10 @@ class InterviewServiceTest {
                 null, null, null, null, null, InterviewStatus.CANCELLED
         );
 
-        when(interviewRepository.findByIdAndJobApplicationId(interviewId, jobApplicationId))
-                .thenReturn(Optional.of(interview));
+        when(interviewRepository.getOrThrow(interviewId, "Interview")).thenReturn(interview);
         when(interviewMapper.toResponse(interview)).thenReturn(dummyResponse);
 
-        interviewService.updateInterviewDetails(jobApplicationId, interviewId, request);
+        interviewService.updateInterviewDetails(interviewId, request);
 
         assertEquals(InterviewStatus.CANCELLED, interview.getStatus());
         verify(eventPublisher, never()).publishEvent(any());
@@ -465,7 +422,6 @@ class InterviewServiceTest {
 
     @Test
     void shouldNotPublishEventWhenNothingRelevantChanges() {
-        UUID jobApplicationId = UUID.randomUUID();
         UUID interviewId = UUID.randomUUID();
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = start.plusHours(1);
@@ -473,11 +429,10 @@ class InterviewServiceTest {
 
         UpdateInterviewRequest request = new UpdateInterviewRequest(null, null, null, null, null, null);
 
-        when(interviewRepository.findByIdAndJobApplicationId(interviewId, jobApplicationId))
-                .thenReturn(Optional.of(interview));
+        when(interviewRepository.getOrThrow(interviewId, "Interview")).thenReturn(interview);
         when(interviewMapper.toResponse(interview)).thenReturn(dummyResponse);
 
-        interviewService.updateInterviewDetails(jobApplicationId, interviewId, request);
+        interviewService.updateInterviewDetails(interviewId, request);
 
         verify(eventPublisher, never()).publishEvent(any());
     }
@@ -486,45 +441,40 @@ class InterviewServiceTest {
 
     @Test
     void shouldSoftDeleteInterview() {
-        UUID jobApplicationId = UUID.randomUUID();
         UUID interviewId = UUID.randomUUID();
         Interview interview = scheduledInterview(interviewId, LocalDateTime.now(), LocalDateTime.now().plusHours(1));
 
-        when(interviewRepository.findByIdAndJobApplicationId(interviewId, jobApplicationId))
-                .thenReturn(Optional.of(interview));
+        when(interviewRepository.getOrThrow(interviewId, "Interview")).thenReturn(interview);
 
-        interviewService.deleteInterview(jobApplicationId, interviewId);
+        interviewService.deleteInterview(interviewId);
 
         assertTrue(interview.isDeleted());
     }
 
     @Test
     void shouldThrowWhenDeletingAlreadyDeletedInterview() {
-        UUID jobApplicationId = UUID.randomUUID();
         UUID interviewId = UUID.randomUUID();
         Interview interview = scheduledInterview(interviewId, LocalDateTime.now(), LocalDateTime.now().plusHours(1));
         interview.setDeleted(true);
 
-        when(interviewRepository.findByIdAndJobApplicationId(interviewId, jobApplicationId))
-                .thenReturn(Optional.of(interview));
+        when(interviewRepository.getOrThrow(interviewId, "Interview")).thenReturn(interview);
 
         assertThrows(
                 InvalidEntityStateException.class,
-                () -> interviewService.deleteInterview(jobApplicationId, interviewId)
+                () -> interviewService.deleteInterview(interviewId)
         );
     }
 
     @Test
-    void shouldThrowWhenDeletingInterviewNotBelongingToJobApplication() {
-        UUID jobApplicationId = UUID.randomUUID();
+    void shouldThrowWhenDeletingNonExistentInterview() {
         UUID interviewId = UUID.randomUUID();
 
-        when(interviewRepository.findByIdAndJobApplicationId(interviewId, jobApplicationId))
-                .thenReturn(Optional.empty());
+        when(interviewRepository.getOrThrow(interviewId, "Interview"))
+                .thenThrow(new ResourceNotFoundException("Interview", interviewId));
 
         assertThrows(
-                InvalidEntityStateException.class,
-                () -> interviewService.deleteInterview(jobApplicationId, interviewId)
+                ResourceNotFoundException.class,
+                () -> interviewService.deleteInterview(interviewId)
         );
     }
 
@@ -532,45 +482,40 @@ class InterviewServiceTest {
 
     @Test
     void shouldRestoreDeletedInterview() {
-        UUID jobApplicationId = UUID.randomUUID();
         UUID interviewId = UUID.randomUUID();
         Interview interview = scheduledInterview(interviewId, LocalDateTime.now(), LocalDateTime.now().plusHours(1));
         interview.setDeleted(true);
 
-        when(interviewRepository.findByIdAndJobApplicationId(interviewId, jobApplicationId))
-                .thenReturn(Optional.of(interview));
+        when(interviewRepository.getOrThrow(interviewId, "Interview")).thenReturn(interview);
 
-        interviewService.restoreInterview(jobApplicationId, interviewId);
+        interviewService.restoreInterview(interviewId);
 
         assertFalse(interview.isDeleted());
     }
 
     @Test
     void shouldThrowWhenRestoringNonDeletedInterview() {
-        UUID jobApplicationId = UUID.randomUUID();
         UUID interviewId = UUID.randomUUID();
         Interview interview = scheduledInterview(interviewId, LocalDateTime.now(), LocalDateTime.now().plusHours(1));
 
-        when(interviewRepository.findByIdAndJobApplicationId(interviewId, jobApplicationId))
-                .thenReturn(Optional.of(interview));
+        when(interviewRepository.getOrThrow(interviewId, "Interview")).thenReturn(interview);
 
         assertThrows(
                 InvalidEntityStateException.class,
-                () -> interviewService.restoreInterview(jobApplicationId, interviewId)
+                () -> interviewService.restoreInterview(interviewId)
         );
     }
 
     @Test
-    void shouldThrowWhenRestoringInterviewNotBelongingToJobApplication() {
-        UUID jobApplicationId = UUID.randomUUID();
+    void shouldThrowWhenRestoringNonExistentInterview() {
         UUID interviewId = UUID.randomUUID();
 
-        when(interviewRepository.findByIdAndJobApplicationId(interviewId, jobApplicationId))
-                .thenReturn(Optional.empty());
+        when(interviewRepository.getOrThrow(interviewId, "Interview"))
+                .thenThrow(new ResourceNotFoundException("Interview", interviewId));
 
         assertThrows(
-                InvalidEntityStateException.class,
-                () -> interviewService.restoreInterview(jobApplicationId, interviewId)
+                ResourceNotFoundException.class,
+                () -> interviewService.restoreInterview(interviewId)
         );
     }
 }

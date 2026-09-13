@@ -2,6 +2,7 @@ package com.szponty.recruitment_system.interview;
 
 import com.szponty.recruitment_system.auth.service.LoggedUserService;
 import com.szponty.recruitment_system.interview.DTO.InterviewResponse;
+import com.szponty.recruitment_system.interview.DTO.UpdateInterviewRequest;
 import com.szponty.recruitment_system.interview.model.InterviewStatus;
 import com.szponty.recruitment_system.interview.service.InterviewService;
 import lombok.RequiredArgsConstructor;
@@ -36,5 +37,26 @@ public class InterviewController {
     @GetMapping("/{id}")
     public ResponseEntity<InterviewResponse> getInterviewById(@PathVariable UUID id) {
         return ResponseEntity.ok(interviewService.getInterviewById(id));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<InterviewResponse> updateInterviewDetails(
+            @PathVariable UUID id,
+            @RequestBody UpdateInterviewRequest request
+    ) {
+        InterviewResponse interview = interviewService.updateInterviewDetails(id, request);
+        return ResponseEntity.ok(interview);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteInterview(@PathVariable UUID id) {
+        interviewService.deleteInterview(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/restore")
+    public ResponseEntity<Void> restoreInterview(@PathVariable UUID id) {
+        interviewService.restoreInterview(id);
+        return ResponseEntity.noContent().build();
     }
 }

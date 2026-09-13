@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface InterviewRepository extends FindOrThrowRepository<Interview, UUID> {
@@ -23,14 +22,6 @@ public interface InterviewRepository extends FindOrThrowRepository<Interview, UU
             @Param("recruiterId") UUID recruiterId,
             @Param("status") InterviewStatus status
     );
-
-    @Query("""
-        SELECT i
-        FROM Interview i
-        WHERE i.id = :interviewId
-          AND i.jobApplicationStep.jobApplication.id = :jobApplicationId
-    """)
-    Optional<Interview> findByIdAndJobApplicationId(UUID interviewId, UUID jobApplicationId);
 
     @Query("""
         SELECT i

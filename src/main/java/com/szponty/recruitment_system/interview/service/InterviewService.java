@@ -40,17 +40,6 @@ public class InterviewService {
     }
 
     @Transactional(readOnly = true)
-    public InterviewResponse getInterviewByIdAndJobApplicationId(UUID jobApplicationId, UUID interviewId) {
-        Interview interview = interviewRepository.findByIdAndJobApplicationId(interviewId, jobApplicationId)
-                .orElseThrow(() -> new InvalidEntityStateException(
-                        "Interview " + interviewId +
-                        " does not belong to job application " + jobApplicationId
-                ));
-
-        return interviewMapper.toResponse(interview);
-    }
-
-    @Transactional(readOnly = true)
     public List<InterviewResponse> getInterviewsForJobApplication(UUID jobApplicationId) {
         List<Interview> interviews = interviewRepository.findByJobApplicationId(jobApplicationId);
         return interviews.stream()
@@ -112,12 +101,8 @@ public class InterviewService {
     }
 
     @Transactional
-    public InterviewResponse updateInterviewDetails(UUID jobApplicationId, UUID interviewId, UpdateInterviewRequest request) {
-        Interview interview = interviewRepository.findByIdAndJobApplicationId(interviewId, jobApplicationId)
-                .orElseThrow(() -> new InvalidEntityStateException(
-                        "Interview " + interviewId +
-                                " does not belong to job application " + jobApplicationId
-                ));
+    public InterviewResponse updateInterviewDetails(UUID interviewId, UpdateInterviewRequest request) {
+        Interview interview = interviewRepository.getOrThrow(interviewId, "Interview");
 
         LocalDateTime newStart = request.scheduledStart() != null
                 ? request.scheduledStart()
@@ -173,7 +158,7 @@ public class InterviewService {
         if (candidateRelevantChange) {
             eventPublisher.publishEvent(new InterviewRescheduledEvent(
                     interview.getId(),
-                    jobApplicationId,
+                    interview.getJobApplication().getId(),
                     oldStart, interview.getScheduledStart(),
                     oldEnd, interview.getScheduledEnd(),
                     oldLocation, interview.getLocation(),
@@ -185,13 +170,8 @@ public class InterviewService {
     }
 
     @Transactional
-    public void deleteInterview(UUID jobApplicationId, UUID interviewId) {
-        Interview interview = interviewRepository
-                .findByIdAndJobApplicationId(interviewId, jobApplicationId)
-                .orElseThrow(() -> new InvalidEntityStateException(
-                        "Interview " + interviewId +
-                                " does not belong to job application " + jobApplicationId
-                ));
+    public void deleteInterview(UUID interviewId) {
+        Interview interview = interviewRepository.getOrThrow(interviewId, "Interview");
 
         if (interview.isDeleted()) {
             throw new InvalidEntityStateException(
@@ -203,13 +183,8 @@ public class InterviewService {
     }
 
     @Transactional
-    public void restoreInterview(UUID jobApplicationId, UUID interviewId) {
-        Interview interview = interviewRepository
-                .findByIdAndJobApplicationId(interviewId, jobApplicationId)
-                .orElseThrow(() -> new InvalidEntityStateException(
-                        "Interview " + interviewId +
-                                " does not belong to job application " + jobApplicationId
-                ));
+    public void restoreInterview(UUID interviewId) {
+        Interview interview = interviewRepository.getOrThrow(interviewId, "Interview");
 
         if (!interview.isDeleted()) {
             throw new InvalidEntityStateException(
