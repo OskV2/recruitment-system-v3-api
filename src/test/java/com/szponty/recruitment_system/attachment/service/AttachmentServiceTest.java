@@ -2,6 +2,7 @@ package com.szponty.recruitment_system.attachment.service;
 
 import com.szponty.recruitment_system.attachment.dto.CreateAttachmentRequest;
 import com.szponty.recruitment_system.attachment.dto.InitiateUploadResponse;
+import com.szponty.recruitment_system.attachment.event.AttachmentUploadedEvent;
 import com.szponty.recruitment_system.attachment.model.Attachment;
 import com.szponty.recruitment_system.attachment.model.AttachmentStatus;
 import com.szponty.recruitment_system.attachment.repository.AttachmentRepository;
@@ -13,6 +14,7 @@ import com.szponty.recruitment_system.jobApplication.repository.JobApplicationRe
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
@@ -168,12 +170,18 @@ public class AttachmentServiceTest {
     void shouldConfirmUpload() {
         UUID attachmentId = UUID.randomUUID();
         Attachment attachment = attachmentWithStatus(attachmentId, AttachmentStatus.PENDING);
+        attachment.setStoredName("some/key.pdf");
 
         when(attachmentRepository.getOrThrow(attachmentId, "Attachment")).thenReturn(attachment);
 
         attachmentService.confirmUpload(attachmentId);
 
         assertEquals(AttachmentStatus.ACTIVE, attachment.getStatus());
+
+        ArgumentCaptor<AttachmentUploadedEvent> captor = ArgumentCaptor.forClass(AttachmentUploadedEvent.class);
+        verify(eventPublisher).publishEvent(captor.capture());
+        assertEquals(attachmentId, captor.getValue().attachmentId());
+        assertEquals("some/key.pdf", captor.getValue().storedName());
     }
 
     @Test
