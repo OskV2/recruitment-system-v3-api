@@ -8,6 +8,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Start dependencies
+        run: docker compose up -d
+      - name: Wait for Postgres
+        run: |
+          until docker compose exec -T postgres pg_isready -U myuser; do
+            echo "Waiting for postgres..."
+            sleep 2
+          done
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
