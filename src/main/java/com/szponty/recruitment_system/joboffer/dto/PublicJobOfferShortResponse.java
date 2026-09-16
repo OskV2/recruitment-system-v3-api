@@ -1,10 +1,6 @@
 package com.szponty.recruitment_system.joboffer.dto;
 
-import com.szponty.recruitment_system.dictionary.model.*;
-import com.szponty.recruitment_system.joboffer.model.JobOfferBenefit;
-
 import java.time.LocalDateTime;
-import java.util.Set;
 
 public record PublicJobOfferShortResponse(
         String name,
@@ -12,11 +8,12 @@ public record PublicJobOfferShortResponse(
         int salaryTo,
         String currency,
         LocalDateTime validTo,
-        ContractType contractType,
-        Location location,
-        FullTimeEquivalent fullTimeEquivalent,
-        WorkModel workModel,
-        Department department,
+        String contractType,
+        String location,
+        String fullTimeEquivalent,
+        String workModel,
+        String department,
         int vacancy
 ) {
+
 }
