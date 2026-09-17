@@ -26,6 +26,11 @@ public abstract class JobOfferMapper {
     @Mapping(target = "substituteRecruiter", source = "substituteRecruiterId")
     public abstract AdminJobOfferDetailsResponse toAdminDetailsResponse(JobOffer jobOffer);
 
+    @Mapping(target = "contractType", source = "contractType.name")
+    @Mapping(target = "location", source = "location")
+    @Mapping(target = "fullTimeEquivalent", source = "fullTimeEquivalent.name")
+    @Mapping(target = "workModel", source = "workModel.name")
+    @Mapping(target = "department", source = "department.name")
     public abstract PublicJobOfferShortResponse toPublicShortResponse(JobOffer jobOffer);
 
     public abstract PublicJobOfferDetailsResponse toPublicDetailsResponse(JobOffer jobOffer);
@@ -152,5 +157,13 @@ public abstract class JobOfferMapper {
         if (substituteRecruiter != null) {
             jobOffer.setSubstituteRecruiterId(substituteRecruiter);
         }
+    }
+
+    protected String map(Location location) {
+        if (location == null) {
+            return null;
+        }
+
+        return location.getCity() + ", " + location.getCountry();
     }
 }
