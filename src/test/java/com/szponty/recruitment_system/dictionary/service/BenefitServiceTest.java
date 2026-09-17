@@ -7,7 +7,6 @@ import com.szponty.recruitment_system.dictionary.mapper.DictionaryMapper;
 import com.szponty.recruitment_system.dictionary.model.Benefit;
 import com.szponty.recruitment_system.dictionary.repository.BenefitRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -46,10 +45,10 @@ class BenefitServiceTest {
                 .deleted(false)
                 .build();
 
-    @Disabled("Fails on AbstractDictionaryService.update - mapper called with null instead of the updated entity. Tracked separately, unrelated to CI setup.")
-    @Test
-    void shouldUpdateBenefit() {
-        UUID benefitId = UUID.randomUUID();
+        createRequest = new DictionaryItemRequest(
+                "Benefit name",
+                "Benefit description"
+        );
 
         updateRequest = new DictionaryItemRequest(
                 "Multisport",
@@ -85,7 +84,6 @@ class BenefitServiceTest {
         verify(benefitRepository).save(benefit);
     }
 
-    @Disabled("AbstractDictionaryService.update throws IllegalArgumentException instead of ResourceNotFoundException. Tracked separately, unrelated to CI setup.")
     @Test
     void shouldSoftDeleteBenefit() {
         mockBenefitExists();
